@@ -9,15 +9,21 @@ import tempfile
 import mimetypes
 import subprocess
 import urllib.request
+from urllib.error import HTTPError, URLError
 from urllib.parse import urlparse
 
+def github_translation(url):
+    url = url.replace('github.com', 'raw.githubusercontent.com')
+    url = url.replace('blob/', '')
+    return url
 
 VIDEO_STREAMER      = 'livestreamer'
-YOUTUBE_HANDLER     = 'mpv'
 
 VIDEO_URLS          = ('youtube.com', 'youtu.be', 'www.youtube.com')
 STREAM_URLS         = ('www.twitch.tv', 'twitch.tv')
-
+TRANSLATION_RULES   = {
+    'github.com' : github_translation,
+}
 
 def launch_command(command, args):
     if type(args) is str:
@@ -49,7 +55,7 @@ def launch_editor(url):
     if editor in ('vi', 'vim', 'neovim', 'nano', 'joe') and not is_terminal():
         term = os.getenv('TERMCMD')
 
-        if term and term in ('termite'):
+        if term and term.endswith('termite'):
             file_name = download_file(url)
 
             if file_name:
@@ -64,20 +70,12 @@ def launch_editor(url):
 
 def download_file(url):
     tmp_dir = tempfile.gettempdir()
-    tmp_dir = tmp_dir + '/plumber'
-
-    if not os.path.isdir(tmp_dir):
-        os.mkdir(tmp_dir)
-
-    fd, file_name = tempfile.mkstemp(prefix='plumber', dir=tmp_dir)
 
     try:
-        os.write(fd, urllib.request.urlopen(url).read())
-        os.close(fd)
-        return file_name
-    except:
-        os.close(fd)
-        os.remove(file_name)
+        with tempfile.NamedTemporaryFile(prefix="plumber-", dir=tmp_dir, delete=False) as f:
+            f.write(urllib.request.urlopen(url).read())
+            return f.name
+    except OSError:
         return None
 
 
@@ -99,7 +97,6 @@ def download_launch_command(command, url, args=None):
 
 
 def handle_mime(url, mime_type):
-
     if mime_type.startswith('video/'):
         return launch_command('rifle', url)
 
@@ -122,7 +119,7 @@ def lookup_content_type(url):
     try:
         request = urllib.request.urlopen(request)
         response = request.getheader('Content-Type')
-    except:
+    except (HTTPError, URLError):
         return None, None
 
     if ';' in response:
@@ -151,25 +148,25 @@ def main():
     if len(sys.argv) != 2:
         return -1
 
-    try:
-        url = urlparse(sys.argv[1])
-    except:
-        return -1
-
+    url = urlparse(sys.argv[1])
     url_string = url.geturl()
 
     if url.netloc in (VIDEO_URLS):
-        return launch_command(YOUTUBE_HANDLER, url_string)
+        return launch_command('mpv', url_string)
 
     elif url.netloc in (STREAM_URLS):
         return launch_command(VIDEO_STREAMER, url_string)
 
     mime_type = find_mime_type(url)
 
-    if mime_type:
-        return handle_mime(url_string, mime_type)
+    if mime_type and mime_type != "text/html":
+        for site, rule in TRANSLATION_RULES.items():
+            if site in url.netloc:
+                url_string = rule(url_string)
 
-    return launch_browser(url_string)
+        return handle_mime(url_string, mime_type)
+    else:
+        return launch_browser(url_string)
 
 
 if __name__ == '__main__':
