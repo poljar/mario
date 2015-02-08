@@ -5,9 +5,11 @@
 
 import os
 import sys
+import argparse
 import tempfile
 import mimetypes
 import subprocess
+import logging as log
 import urllib.request
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlparse
@@ -81,7 +83,9 @@ def download_file(url):
         with tempfile.NamedTemporaryFile(prefix='plumber-', dir=tmp_dir, delete=False) as f:
             f.write(opener.open(url).read())
             return f.name
-    except OSError:
+    except OSError as e:
+        log.debug('Error downloading file: ' + str(e))
+
         return None
 
 
@@ -125,7 +129,9 @@ def lookup_content_type(url):
     try:
         request = urllib.request.urlopen(request)
         response = request.getheader('Content-Type')
-    except (HTTPError, URLError):
+    except (HTTPError, URLError) as e:
+        log.debug('Error looking up content type: ' + str(e))
+
         return None, None
 
     if ';' in response:
@@ -151,10 +157,20 @@ def find_mime_type(url):
 
 
 def main():
-    if len(sys.argv) != 2:
-        return -1
+    parser = argparse.ArgumentParser()
 
-    url = urlparse(sys.argv[1])
+    parser.add_argument('-v', '--verbose', help='turn on verbose mode',
+                        action='store_true')
+    parser.add_argument('URL', help='URL to handle.', type=str)
+
+    args = parser.parse_args()
+
+    if args.verbose:
+        log.basicConfig(format='%(levelname)s: %(message)s', level=log.DEBUG)
+    else:
+        log.basicConfig(format='%(levelname)s: %(message)s')
+
+    url = urlparse(args.URL)
     url_string = url.geturl()
 
     if url.netloc in (VIDEO_URLS):
