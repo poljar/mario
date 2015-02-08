@@ -25,6 +25,9 @@ TRANSLATION_RULES   = {
     'github.com' : github_translation,
 }
 
+USER_AGENT = 'Mozilla/5.0 (Windows NT 6.3; rv:36.0) Gecko/20100101 Firefox/36.0'
+
+
 def launch_command(command, args):
     if type(args) is str:
         args = [args]
@@ -69,11 +72,14 @@ def launch_editor(url):
 
 
 def download_file(url):
+    opener = urllib.request.build_opener()
+    opener.addheaders = [('User-agent', USER_AGENT)]
+
     tmp_dir = tempfile.gettempdir()
 
     try:
         with tempfile.NamedTemporaryFile(prefix="plumber-", dir=tmp_dir, delete=False) as f:
-            f.write(urllib.request.urlopen(url).read())
+            f.write(opener.open(url).read())
             return f.name
     except OSError:
         return None
