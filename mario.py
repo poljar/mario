@@ -78,7 +78,7 @@ def download_file(url):
     tmp_dir = tempfile.gettempdir()
 
     try:
-        with tempfile.NamedTemporaryFile(prefix="plumber-", dir=tmp_dir, delete=False) as f:
+        with tempfile.NamedTemporaryFile(prefix='plumber-', dir=tmp_dir, delete=False) as f:
             f.write(opener.open(url).read())
             return f.name
     except OSError:
@@ -165,7 +165,7 @@ def main():
 
     mime_type = find_mime_type(url)
 
-    if mime_type and mime_type != "text/html":
+    if mime_type and mime_type != 'text/html':
         for site, rule in TRANSLATION_RULES.items():
             if site in url.netloc:
                 url_string = rule(url_string)
