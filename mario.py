@@ -18,6 +18,9 @@ from functools import reduce
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlparse
 
+def get_var_references(s):
+    tokens = s.split()
+    return [t for t in tokens if t[0] == '{' and t[-1] == '}']
 
 def type_is_func(msg, arguments, match_group):
     url = urlparse(msg['data'])
@@ -96,7 +99,11 @@ def content_is_func(msg, arguments, match_group):
 
 def plumb_open_func(msg, arguments, match_group):
     tmp = arguments.format(*match_group, **msg)
-    print(tmp)
+
+    vs = get_var_references(arguments)
+    for v in vs:
+        var_name = v.strip('{}')
+        log.info('\t{var} = {value}'.format(var=v, value=msg[var_name]))
 #    return subprocess.call(tmp.split())
 
 
@@ -124,7 +131,10 @@ action_rules = {
 def handle_rules(msg, config):
     rule_matched = False
 
+    log.info('Matching message against rules.')
     for rule in config.sections():
+
+        log.debug('Matching against rule [%s]', rule)
 
         match_group = ()
         options = config.options(rule)
@@ -143,9 +153,12 @@ def handle_rules(msg, config):
             rule_matched = True
 
         if rule_matched:
+            log.info('Rule [%s] matched.', rule)
             for opt in action_options:
+                action = config.get(rule, opt)
+                log.info('Executing action "%s" for rule [%s].', action, rule)
                 f = action_rules[opt]
-                msg = f(msg, config.get(rule, opt), match_group)
+                msg = f(msg, action, match_group)
 
             break
 
@@ -166,6 +179,7 @@ def main():
 
     config = configparser.ConfigParser()
     config.read('example.ini')
+    log.info('Config parsed.')
 
     config.remove_section('mario')
 
