@@ -20,7 +20,7 @@ from urllib.parse import urlparse
 
 def get_var_references(s):
     tokens = s.split()
-    return [t for t in tokens if t[0] == '{' and t[-1] == '}']
+    return (t for t in tokens if t[0] == '{' and t[-1] == '}')
 
 def type_is_func(msg, arguments, match_group):
     url = urlparse(msg['data'])
@@ -139,8 +139,8 @@ def handle_rules(msg, config):
         match_group = ()
         options = config.options(rule)
 
-        match_options  = [opt for opt in options if opt in match_rules]
-        action_options = [opt for opt in options if opt in action_rules]
+        match_options  = (opt for opt in options if opt in match_rules)
+        action_options = (opt for opt in options if opt in action_rules)
 
         for opt in match_options:
             f = match_rules[opt]
