@@ -7,8 +7,8 @@ shutil.copyfile('mario.py', 'mario')
 setup(
         name = 'mario',
         version = '0.1',
-        author = 'Damir Jelić',
-        author_email = 'poljar[at]termina.org.uk',
+        author = 'Damir Jelić, Denis Kasak',
+        author_email = 'poljar[at]termina.org.uk, dkasak[at]termina.org.uk',
         description = ('A simple plumber'),
         license = 'ISC',
         scripts = ['mario'],
