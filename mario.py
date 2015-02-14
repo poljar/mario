@@ -165,15 +165,27 @@ def handle_rules(msg, config):
 
 def main():
     parser = argparse.ArgumentParser()
-
-    parser.add_argument('-v', '--verbose', help='turn on verbose mode',
-                        action='store_true')
+    parser.add_argument('-v', '--verbose', action='count',
+                        help='increase log verbosity level (pass multiple times)')
     parser.add_argument('msg', help='message to handle', type=str)
 
     args = parser.parse_args()
 
+    verbosity = log.DEBUG
+
     if args.verbose:
-        log.basicConfig(format='%(levelname)s: %(message)s', level=log.DEBUG)
+        log_levels = {
+            1 : log.WARNING,
+            2 : log.INFO,
+            3 : log.DEBUG
+        }
+        try:
+            verbosity = log_levels[args.verbose]
+        except KeyError:
+            verbosity = log.DEBUG
+
+    if args.verbose:
+        log.basicConfig(format='%(levelname)s: %(message)s', level=verbosity)
     else:
         log.basicConfig(format='%(levelname)s: %(message)s')
 
