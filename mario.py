@@ -64,8 +64,6 @@ def arg_matches_func(msg, arguments, match_group):
     else:
         return True, msg, (m.group(),)
 
-    pass
-
 
 def data_match_func(msg, arguments, match_group):
     return arg_matches_func(msg, '{data} ' + arguments, match_group)
