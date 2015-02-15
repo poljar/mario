@@ -13,26 +13,27 @@ import subprocess
 import configparser
 import logging as log
 import urllib.request
+import magic
+from enum import Enum
 
 from functools import reduce
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlparse
 
+class Kind(Enum):
+    blob = 1
+    url = 2
+
+
 def get_var_references(s):
     tokens = s.split()
     return (t for t in tokens if t[0] == '{' and t[-1] == '}')
 
-def kind_is_func(msg, arguments, match_group):
-    url = urlparse(msg['data'])
-    is_url = bool(url.scheme)
 
-    if arguments == 'blob' and not is_url:
-        return True, msg, match_group
-    elif arguments == 'url' and is_url:
-        msg['netloc'] = url.netloc
-        msg['netpath'] = url.path
-        return True, msg, match_group
-    else:
+def kind_is_func(msg, arguments, match_group):
+    try:
+        return msg['kind'] == Kind[arguments], msg, match_group
+    except KeyError:
         return False, msg, match_group
 
 
@@ -84,10 +85,10 @@ def data_rewrite_func(msg, arguments, match_group):
 
 
 def data_istype_func(msg, arguments, match_group):
-    if msg['kind'] == 'url':
+    if msg['kind'] == Kind.url:
         t, _ = mimetypes.guess_type(msg['data'])
-    elif msg['kind'] == 'blob':
-        t, _ = magic.from_buffer(msg['data'])
+    elif msg['kind'] == Kind.blob:
+        t = magic.from_buffer(msg['data'])
     else:
         pass
 
@@ -167,6 +168,13 @@ def main():
     parser.add_argument('-v', '--verbose', action='count',
                         help='increase log verbosity level (pass multiple times)')
     parser.add_argument('msg', help='message to handle', type=str)
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument('kind', help='kind of message',
+                        nargs='?',
+                        type=lambda n: Kind[n],
+                        choices=[k for k in Kind])
+    group.add_argument('--guess',  action='store_true',
+                       help='guess the kind of the message')
 
     args = parser.parse_args()
 
@@ -188,13 +196,26 @@ def main():
     else:
         log.basicConfig(format='%(levelname)s: %(message)s')
 
+    if args.guess:
+        log.info("Using heuristics to guess kind...")
+        url = urlparse(args.msg)
+        if url.scheme:
+            args.kind = Kind.url
+        else:
+            args.kind = Kind.blob
+        log.info("\tGuessed kind {}".format(args.kind))
+
+
     config = configparser.ConfigParser()
     config.read('example.ini')
     log.info('Config parsed.')
 
     config.remove_section('mario')
 
-    handle_rules({'data' : args.msg}, config)
+    handle_rules({'data' : args.msg,
+                  'kind' : args.kind
+                 }, config)
+
 
 if __name__ == '__main__':
     main()
