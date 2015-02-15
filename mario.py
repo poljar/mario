@@ -84,7 +84,12 @@ def data_rewrite_func(msg, arguments, match_group):
 
 
 def data_istype_func(msg, arguments, match_group):
-    t, _ = mimetypes.guess_type(msg['data'])
+    if msg['kind'] == 'url':
+        t, _ = mimetypes.guess_type(msg['data'])
+    elif msg['kind'] == 'blob':
+        t, _ = magic.from_buffer(msg['data'])
+    else:
+        pass
 
     try:
         return t in arguments, msg, match_group
