@@ -22,19 +22,16 @@ def get_var_references(s):
     tokens = s.split()
     return (t for t in tokens if t[0] == '{' and t[-1] == '}')
 
-def type_is_func(msg, arguments, match_group):
+def kind_is_func(msg, arguments, match_group):
     url = urlparse(msg['data'])
     is_url = bool(url.scheme)
 
-    if arguments == 'text' and not is_url:
+    if arguments == 'blob' and not is_url:
         return True, msg, match_group
-
     elif arguments == 'url' and is_url:
         msg['netloc'] = url.netloc
         msg['netpath'] = url.path
-
         return True, msg, match_group
-
     else:
         return False, msg, match_group
 
@@ -86,7 +83,7 @@ def data_rewrite_func(msg, arguments, match_group):
     return arg_rewrite_func(msg, '{data} ' + arguments, match_group)
 
 
-def content_is_func(msg, arguments, match_group):
+def data_istype_func(msg, arguments, match_group):
     t, _ = mimetypes.guess_type(msg['data'])
 
     try:
@@ -110,14 +107,14 @@ def plumb_download_func(msg, arguments, match_group):
 
 
 match_rules = {
-        'type is'      : type_is_func,
+        'kind is'      : kind_is_func,
         'arg is'       : arg_is_func,
         'data is'      : data_is_func,
+        'data istype'  : data_istype_func,
         'arg matches'  : arg_matches_func,
         'data matches' : data_match_func,
         'arg rewrite'  : arg_rewrite_func,
         'data rewrite' : data_rewrite_func,
-        'content is'   : content_is_func,
 }
 
 action_rules = {
