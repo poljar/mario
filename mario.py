@@ -129,11 +129,9 @@ action_rules = {
 
 
 def handle_rules(msg, config):
-    rule_matched = False
-
     log.info('Matching message against rules.')
-    for rule in config.sections():
 
+    for rule in config.sections():
         log.debug('Matching against rule [%s]', rule)
 
         match_group = ()
@@ -149,7 +147,7 @@ def handle_rules(msg, config):
             if not res:
                 rule_matched = False
                 break
-
+        else:
             rule_matched = True
 
         if rule_matched:
@@ -159,8 +157,9 @@ def handle_rules(msg, config):
                 log.info('Executing action "%s" for rule [%s].', action, rule)
                 f = action_rules[opt]
                 msg = f(msg, action, match_group)
-
             break
+    else:
+        log.info('No rule matched.')
 
 
 def main():
