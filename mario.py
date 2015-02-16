@@ -193,7 +193,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-v', '--verbose', action='count',
                         help='increase log verbosity level (pass multiple times)')
-    parser.add_argument('msg', help='message to handle', type=str)
+    parser.add_argument('msg', help='message to handle')
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('kind', help='kind of message',
                         nargs='?',
@@ -239,6 +239,12 @@ def main():
         url = urlparse(args.msg)
         msg['netloc'] = url.netloc
         msg['netpath'] = url.path
+
+    # probably a hack and possibly a reason why we can't really read in
+    # messages (or rather, the data part of the message) as a command-line
+    # parameter
+    if args.kind == Kind.blob and type(args.msg) != bytes:
+        args.msg = args.msg.encode('utf-8')
 
     config = configparser.ConfigParser()
     config_path = os.path.join(BaseDirectory.xdg_config_home, 'mario', 'example.ini')
