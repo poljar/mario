@@ -157,7 +157,9 @@ def handle_rules(msg, config):
                 action = config.get(rule, opt)
                 log.info('Executing action "%s" for rule [%s].', action, rule)
                 f = action_rules[opt]
-                msg = f(msg, action, match_group)
+                res, msg, match_group = f(msg, action, match_group)
+                if not res:
+                    break
             break
     else:
         log.info('No rule matched.')
