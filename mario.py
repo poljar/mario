@@ -88,7 +88,8 @@ def data_istype_func(msg, arguments, match_group):
     if msg['kind'] == Kind.url:
         t, _ = mimetypes.guess_type(msg['data'])
     elif msg['kind'] == Kind.blob:
-        t = magic.from_buffer(msg['data'], mime=True)
+        # magic returns the mimetype as bytes, hence the decode
+        t = magic.from_buffer(msg['data'], mime=True).decode('utf-8')
     else:
         pass
 
