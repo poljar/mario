@@ -1,20 +1,15 @@
 #!/usr/bin/env python3
 import os, shutil
-from distutils.core import setup
+from setuptools import setup
 
-shutil.copyfile('mario.py', 'mario')
-
-setup(
-        name = 'mario',
-        version = '0.1',
-        author = 'Damir Jelić, Denis Kasak',
-        author_email = 'poljar[at]termina.org.uk, dkasak[at]termina.org.uk',
-        description = ('A simple plumber'),
-        license = 'ISC',
-        scripts = ['mario'],
-      )
-
-try:
-    os.remove('mario')
-except Exception:
-    pass
+setup(name = 'mario',
+      version = '0.1',
+      author = 'Damir Jelić, Denis Kasak',
+      author_email = 'poljar[at]termina.org.uk, dkasak[at]termina.org.uk',
+      description = ('A simple plumber'),
+      install_requires = ['python-magic', 'pyxdg'],
+      license = 'ISC',
+      entry_points = {
+          "console_scripts" : ['mario = mario:main']
+          }
+     )
