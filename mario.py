@@ -205,6 +205,14 @@ def main():
             args.kind = Kind.blob
         log.info("\tGuessed kind {}".format(args.kind))
 
+    msg = {'data' : args.msg,
+           'kind' : args.kind
+          }
+
+    if args.kind == Kind.url:
+        url = urlparse(args.msg)
+        msg['netloc'] = url.netloc
+        msg['netpath'] = url.path
 
     config = configparser.ConfigParser()
     config_path = os.path.join(BaseDirectory.xdg_config_home, 'mario', 'example.ini')
@@ -214,9 +222,7 @@ def main():
 
     config.remove_section('mario')
 
-    handle_rules({'data' : args.msg,
-                  'kind' : args.kind
-                 }, config)
+    handle_rules(msg, config)
 
 
 if __name__ == '__main__':
