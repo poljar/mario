@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import os, shutil
 from setuptools import setup
+from xdg import BaseDirectory
 
 setup(name = 'mario',
       version = '0.1',

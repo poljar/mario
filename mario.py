@@ -14,8 +14,8 @@ import configparser
 import logging as log
 import urllib.request
 import magic
+from xdg import BaseDirectory
 from enum import Enum
-
 from functools import reduce
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlparse
@@ -207,7 +207,9 @@ def main():
 
 
     config = configparser.ConfigParser()
-    config.read('example.ini')
+    config_path = os.path.join(BaseDirectory.xdg_config_home, 'mario', 'example.ini')
+    log.info('Using config file {}'.format(config_path))
+    config.read(config_path)
     log.info('Config parsed.')
 
     config.remove_section('mario')
