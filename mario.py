@@ -104,12 +104,35 @@ def plumb_open_func(msg, arguments, match_group):
     vs = get_var_references(arguments)
     for v in vs:
         var_name = v.strip('{}')
-        log.info('\t{var} = {value}'.format(var=v, value=msg[var_name]))
-#    return subprocess.call(tmp.split())
+        log.info('\t\t{var} = {value}'.format(var=v, value=msg[var_name]))
+
+    ret = subprocess.call(tmp.split())
+    if ret == 0:
+        return True, msg, match_group
+    else:
+        log.info('\t\tTarget program exited with non-zero exit code ({})'.format(ret))
+        return False, msg, match_group
 
 
 def plumb_download_func(msg, arguments, match_group):
-    pass
+    if msg['kind'] != Kind.url:
+        return False, msg, match_group
+
+    user_agent = 'Mozilla/5.0 (Windows NT 6.3; rv:36.0) Gecko/20100101 Firefox/36.0'
+
+    opener = urllib.request.build_opener()
+    opener.addheaders = [('User-agent', user_agent)]
+
+    tmp_dir = tempfile.gettempdir()
+
+    try:
+        with tempfile.NamedTemporaryFile(prefix='plumber-', dir=tmp_dir, delete=False) as f:
+            f.write(opener.open(msg['data']).read())
+            msg['filename'] = f.name
+            return True, msg, match_group
+    except OSError as e:
+        log.info('Error downloading file: ' + str(e))
+        return False, msg, match_group
 
 
 match_rules = {
