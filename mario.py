@@ -21,7 +21,7 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import urlparse
 
 class Kind(Enum):
-    blob = 1
+    raw = 1
     url = 2
 
 
@@ -87,7 +87,7 @@ def data_rewrite_func(msg, arguments, match_group):
 def data_istype_func(msg, arguments, match_group):
     if msg['kind'] == Kind.url:
         t, _ = mimetypes.guess_type(msg['data'])
-    elif msg['kind'] == Kind.blob:
+    elif msg['kind'] == Kind.raw:
         # magic returns the mimetype as bytes, hence the decode
         t = magic.from_buffer(msg['data'], mime=True).decode('utf-8')
     else:
@@ -228,7 +228,7 @@ def main():
         if url.scheme:
             args.kind = Kind.url
         else:
-            args.kind = Kind.blob
+            args.kind = Kind.raw
         log.info("\tGuessed kind {}".format(args.kind))
 
     msg = {'data' : args.msg,
@@ -243,7 +243,7 @@ def main():
     # probably a hack and possibly a reason why we can't really read in
     # messages (or rather, the data part of the message) as a command-line
     # parameter
-    if args.kind == Kind.blob and type(args.msg) != bytes:
+    if args.kind == Kind.raw and type(args.msg) != bytes:
         args.msg = args.msg.encode('utf-8')
 
     config = configparser.ConfigParser()
