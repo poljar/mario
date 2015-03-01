@@ -214,8 +214,7 @@ def main():
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('kind', help='kind of message',
                         nargs='?',
-                        type=lambda n: Kind[n],
-                        choices=[k for k in Kind])
+                        choices=[str(k).strip('Kind.') for k in Kind])
     group.add_argument('--guess',  action='store_true',
                        help='guess the kind of the message')
 
@@ -238,6 +237,9 @@ def main():
         log.basicConfig(format='%(levelname)s:\t%(message)s', level=verbosity)
     else:
         log.basicConfig(format='%(levelname)s:\t%(message)s')
+
+    if args.kind:
+        args.kind = Kind[args.kind]
 
     if args.guess:
         log.info("Using heuristics to guess kind...")
