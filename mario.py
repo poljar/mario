@@ -83,6 +83,8 @@ def data_rewrite_func(msg, arguments, match_group):
 
 
 def data_istype_func(msg, arguments, match_group):
+    log.debug("Executing clause 'data istype {}'".format(arguments))
+
     if msg['kind'] == Kind.url:
         t, _ = mimetypes.guess_type(msg['data'])
     elif msg['kind'] == Kind.raw:
@@ -91,9 +93,12 @@ def data_istype_func(msg, arguments, match_group):
     else:
         pass
 
-    try:
-        return t in arguments, msg, match_group
-    except TypeError:
+    m = re.match(arguments, t)
+
+    if m:
+        log.debug("\ttype = {}".format(m.group()))
+        return bool(m), msg, match_group
+    else:
         return False, msg, match_group
 
 
