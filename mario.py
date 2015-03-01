@@ -96,9 +96,10 @@ def data_istype_func(msg, arguments, match_group):
     m = re.match(arguments, t)
 
     if m:
-        log.debug("\ttype = {}".format(m.group()))
+        log.debug("\tType matches: {}".format(m.group()))
         return bool(m), msg, match_group
     else:
+        log.debug("\tType doesn't match or cannot guess type.")
         return False, msg, match_group
 
 
@@ -221,9 +222,9 @@ def main():
             verbosity = log.DEBUG
 
     if args.verbose:
-        log.basicConfig(format='%(levelname)s: %(message)s', level=verbosity)
+        log.basicConfig(format='%(levelname)s:\t%(message)s', level=verbosity)
     else:
-        log.basicConfig(format='%(levelname)s: %(message)s')
+        log.basicConfig(format='%(levelname)s:\t%(message)s')
 
     if args.guess:
         log.info("Using heuristics to guess kind...")
