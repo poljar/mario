@@ -64,6 +64,16 @@ rule_res3 = [
                 ]
             ]
 
+rule_with_comment = '''# this is a comment
+[test] # even here?
+# another one
+    
+arg matches {data} regex_string # commenting is fun
+
+   # maybe here with some whitespace?
+
+plumb open firefox'''
+
 
 class ParserTest(unittest.TestCase):
     def test_simple_rule(self):
@@ -81,6 +91,10 @@ class ParserTest(unittest.TestCase):
         result = parse_rule_string(parser, rule_test3)
         self.assertEqual(result, rule_res3)
 
+    def test_rule_with_comment(self):
+        parser = make_parser()
+        result = parse_rule_string(parser, rule_with_comment)
+        self.assertEqual(result, rule_res1)
 
 if __name__ == '__main__':
         unittest.main()

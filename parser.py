@@ -16,6 +16,10 @@ def make_parser():
     WS     = OneOrMore(Space)
     indent = OneOrMore(Space) | OneOrMore(Tab)
 
+    Comment   = LineStart() + ZeroOrMore(' ') + '#' + restOfLine + EOL | \
+                OneOrMore(' ') + '#' + restOfLine
+    BlankLine = LineStart() + ZeroOrMore(' ') + EOL
+
 # TODO SkipTo(EOL) Word -> Regex?
     ArgTxt   = Word(printables)('arg')
     NameTxt  = Word(alphas + nums + '-' + '_')
@@ -52,7 +56,8 @@ def make_parser():
     ActionVerb   = Keyword('open')     | \
                    Keyword('download')
 
-    ActionArg = Combine(Word(printables) + SkipTo(EOL))
+    ActionArg = Combine(Word(printables) + \
+                ZeroOrMore(OneOrMore(' ') + Word(printables)))
 
     ActionRule = Group(ActionObject('object') + WS + \
                        ActionVerb('verb')     + WS + \
@@ -70,6 +75,9 @@ def make_parser():
 
     RuleFile = Rule('rule') + ZeroOrMore(EOL + Rule('rule')) + StringEnd()
     RuleFile = RuleFile('rules')
+
+    RuleFile.ignore(Comment)
+    RuleFile.ignore(BlankLine)
 
     return RuleFile
 
