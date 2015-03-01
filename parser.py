@@ -7,7 +7,7 @@ from pyparsing import *
 
 
 def make_parser():
-    ParserElement.setDefaultWhitespaceChars("")
+    ParserElement.setDefaultWhitespaceChars('')
 
 # TODO make whitespace less strict
     EOL    = LineEnd().suppress()
