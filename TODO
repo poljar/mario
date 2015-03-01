@@ -1,0 +1,2 @@
+* Add a way of specifying whether mimetypes.guess_type or magic (on the
+  downloaded file) should be used for determining the mimetype for Kind.url
