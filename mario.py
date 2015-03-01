@@ -87,6 +87,19 @@ def data_istype_func(msg, arguments, match_group):
 
     if msg['kind'] == Kind.url:
         t, _ = mimetypes.guess_type(msg['data'])
+
+        if not t:
+            log.debug("Failed mimetype guessing... Downloading file and trying with magic.")
+
+            # FIXME: downloading files like this should be refactored into
+            # a separate function and used both here and in plumb_open_func
+            user_agent = 'Mozilla/5.0 (Windows NT 6.3; rv:36.0) Gecko/20100101 Firefox/36.0'
+
+            opener = urllib.request.build_opener()
+            opener.addheaders = [('User-agent', user_agent)]
+
+            data = opener.open(msg['data']).read()
+            t = magic.from_buffer(data, mime=True).decode('utf-8')
     elif msg['kind'] == Kind.raw:
         # magic returns the mimetype as bytes, hence the decode
         t = magic.from_buffer(msg['data'], mime=True).decode('utf-8')
