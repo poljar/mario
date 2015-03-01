@@ -91,11 +91,27 @@ def extract_parse_result(result):
     return rules
 
 
+def print_parse_error(e):
+    print(e, ':\n\t', e.line)
+    error_indicator = '\t' + ' ' * e.col + '^'
+
+    print(error_indicator)
+
 def parse_rule_file(parser, rule_file):
-    result = parser.parseFile(rule_file)
+    try:
+        result = parser.parseFile(rule_file)
+    except ParseException as e:
+        print_parse_error(e)
+        return None
+
     return extract_parse_result(result)
 
 
 def parse_rule_string(parser, rule_string):
-    result = parser.parseString(rule_string)
+    try:
+        result = parser.parseString(rule_string)
+    except ParseException as e:
+        print_parse_error(e)
+        return None
+
     return extract_parse_result(result)
