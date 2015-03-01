@@ -54,13 +54,11 @@ def arg_matches_func(msg, arguments, match_group):
     for pattern in patterns.split('\n'):
         m = re.search(pattern, arg)
 
-        if not m:
+        if m:
+            return True, msg, match_group + m.groups()
+            break
+        else:
             return False, msg, ()
-
-    if m.groups():
-        return True, msg, m.groups()
-    else:
-        return True, msg, (m.group(),)
 
 
 def data_match_func(msg, arguments, match_group):
