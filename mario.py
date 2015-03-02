@@ -208,7 +208,7 @@ def handle_rules(msg, config):
         log.info('No rule matched.')
 
 
-def main():
+def parse_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument('-v', '--verbose', action='count',
                         help='increase log verbosity level (pass multiple times)')
@@ -224,7 +224,11 @@ def main():
     parser.add_argument('--rule', type=argparse.FileType('r'),
                         help='rule file to use')
 
-    args = parser.parse_args()
+    return parser.parse_args()
+
+
+def main():
+    args = parse_arguments()
 
     verbosity = log.DEBUG
 
