@@ -245,6 +245,32 @@ def setup_logger(verbosity):
         log.basicConfig(format='%(levelname)s:\t%(message)s')
 
 
+def parse_rules(args):
+    config = configparser.ConfigParser()
+
+    rule_file = None
+
+    if args.rule:
+        rule_file = args.rule
+    else:
+        defualt_rule = os.path.join(BaseDirectory.xdg_config_home, 'mario', \
+                                    'mario.plumb')
+        try:
+            rule_file = open(defualt_rule)
+        except OSError as e:
+            log.error(str(e))
+            return -1
+
+    log.info('Using config file {}'.format(rule_file.name))
+    config.read_file(rule_file)
+    rule_file.close()
+    log.info('Config parsed.')
+
+    config.remove_section('mario')
+
+    return config
+
+
 def main():
     args = parse_arguments()
 
@@ -277,29 +303,9 @@ def main():
     if args.kind == Kind.raw and type(args.msg) != bytes:
         args.msg = args.msg.encode('utf-8')
 
-    config = configparser.ConfigParser()
+    rules = parse_rules(args)
 
-    rule_file = None
-
-    if args.rule:
-        rule_file = args.rule
-    else:
-        defualt_rule = os.path.join(BaseDirectory.xdg_config_home, 'mario', \
-                                    'mario.plumb')
-        try:
-            rule_file = open(defualt_rule)
-        except OSError as e:
-            log.error(str(e))
-            return -1
-
-    log.info('Using config file {}'.format(rule_file.name))
-    config.read_file(rule_file)
-    rule_file.close()
-    log.info('Config parsed.')
-
-    config.remove_section('mario')
-
-    handle_rules(msg, config)
+    handle_rules(msg, rules)
 
 
 if __name__ == '__main__':
