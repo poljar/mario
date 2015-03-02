@@ -84,13 +84,13 @@ def data_rewrite_func(msg, arguments, match_group):
 
 
 def data_istype_func(msg, arguments, match_group):
-    log.debug("Executing clause 'data istype {}'".format(arguments))
+    log.debug('Executing clause \'data istype {}\''.format(arguments))
 
     if msg['kind'] == Kind.url:
         t, _ = mimetypes.guess_type(msg['data'])
 
         if not t:
-            log.debug("Failed mimetype guessing... Downloading file and trying with magic.")
+            log.debug('Failed mimetype guessing... Downloading file and trying with magic.')
 
             # FIXME: downloading files like this should be refactored into
             # a separate function and used both here and in plumb_open_func
@@ -110,10 +110,10 @@ def data_istype_func(msg, arguments, match_group):
     m = re.match(arguments, t)
 
     if m:
-        log.debug("\tType matches: {}".format(m.group()))
+        log.debug('\tType matches: {}'.format(m.group()))
         return bool(m), msg, match_group
     else:
-        log.debug("\tType doesn't match or cannot guess type.")
+        log.debug('\tType doesn\'t match or cannot guess type.')
         return False, msg, match_group
 
 
@@ -248,13 +248,13 @@ def main():
         args.kind = Kind[args.kind]
 
     if args.guess:
-        log.info("Using heuristics to guess kind...")
+        log.info('Using heuristics to guess kind...')
         url = urlparse(args.msg)
         if url.scheme:
             args.kind = Kind.url
         else:
             args.kind = Kind.raw
-        log.info("\tGuessed kind {}".format(args.kind))
+        log.info('\tGuessed kind {}'.format(args.kind))
 
     msg = {'data' : args.msg,
            'kind' : args.kind
