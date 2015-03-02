@@ -221,6 +221,8 @@ def parse_arguments():
     group.add_argument('--guess',  action='store_true',
                        help='guess the kind of the message')
 
+    parser.add_argument('--config', type=argparse.FileType('r'),
+                        help='rule file to use')
     parser.add_argument('--rule', type=argparse.FileType('r'),
                         help='rule file to use')
 
@@ -245,7 +247,7 @@ def setup_logger(verbosity):
         log.basicConfig(format='%(levelname)s:\t%(message)s')
 
 
-def parse_rules(args):
+def parse_rules(args, cfg):
     config = configparser.ConfigParser()
 
     rule_file = None
@@ -253,8 +255,7 @@ def parse_rules(args):
     if args.rule:
         rule_file = args.rule
     else:
-        default_rule = os.path.join(BaseDirectory.xdg_config_home, 'mario', \
-                                    'mario.plumb')
+        default_rule = cfg['rules file']
         try:
             rule_file = open(default_rule)
         except OSError as e:
@@ -271,10 +272,50 @@ def parse_rules(args):
     return config
 
 
+def parse_config(args):
+    def_rule_dir = os.path.join(BaseDirectory.xdg_config_home, 'mario', \
+                                'rules.d')
+    def_rule_file = os.path.join(BaseDirectory.xdg_config_home, 'mario', \
+                                'mario.plumb')
+    defaults = {
+            'strict content lookup' : False,            # TODO
+            'notifications'         : False,            # TODO
+            'rules file'            : def_rule_file,
+            'rules dir'             : def_rule_dir,     # TODO
+    }
+
+    config = configparser.ConfigParser(defaults=defaults,
+                                       default_section='mario')
+
+    config_file = None
+
+    if args.config:
+        config_file = args.config
+    else:
+        default_config = os.path.join(BaseDirectory.xdg_config_home, 'mario', \
+                                      'config')
+        try:
+            config_file = open(default_config)
+        except OSError as e:
+            log.info(str(e))
+            return defaults
+
+    log.info('Using config file {}'.format(config_file.name))
+
+    config.read_file(config_file)
+    config_file.close()
+
+    log.info('Config parsed.')
+
+    return config.defaults()
+
+
 def main():
     args = parse_arguments()
 
     setup_logger(args.verbose)
+
+    config = parse_config(args)
 
     if args.kind:
         args.kind = Kind[args.kind]
@@ -303,7 +344,7 @@ def main():
     if args.kind == Kind.raw and type(args.msg) != bytes:
         args.msg = args.msg.encode('utf-8')
 
-    rules = parse_rules(args)
+    rules = parse_rules(args, config)
 
     handle_rules(msg, rules)
 
