@@ -266,9 +266,20 @@ def main():
         args.msg = args.msg.encode('utf-8')
 
     config = configparser.ConfigParser()
-    config_path = os.path.join(BaseDirectory.xdg_config_home, 'mario', 'example.ini')
-    log.info('Using config file {}'.format(config_path))
-    config.read(config_path)
+
+    rule_file = None
+
+    defualt_rule = os.path.join(BaseDirectory.xdg_config_home, 'mario', \
+                                'mario.plumb')
+    try:
+        rule_file = open(defualt_rule)
+    except OSError as e:
+        log.error(str(e))
+        return -1
+
+    log.info('Using config file {}'.format(rule_file.name))
+    config.read_file(rule_file)
+    rule_file.close()
     log.info('Config parsed.')
 
     config.remove_section('mario')
