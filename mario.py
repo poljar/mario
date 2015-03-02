@@ -247,15 +247,15 @@ def setup_logger(verbosity):
         log.basicConfig(format='%(levelname)s:\t%(message)s')
 
 
-def parse_rules(args, cfg):
-    config = configparser.ConfigParser()
+def parse_rules(args, config):
+    parser = configparser.ConfigParser()
 
     rule_file = None
 
     if args.rule:
         rule_file = args.rule
     else:
-        default_rule = cfg['rules file']
+        default_rule = config['rules file']
         try:
             rule_file = open(default_rule)
         except OSError as e:
@@ -263,13 +263,11 @@ def parse_rules(args, cfg):
             return -1
 
     log.info('Using rule file {}'.format(rule_file.name))
-    config.read_file(rule_file)
+    parser.read_file(rule_file)
     rule_file.close()
-    log.info('Rule parsed.')
+    log.info('Rules parsed.')
 
-    config.remove_section('mario')
-
-    return config
+    return parser
 
 
 def parse_config(args):
