@@ -253,10 +253,10 @@ def parse_rules(args):
     if args.rule:
         rule_file = args.rule
     else:
-        defualt_rule = os.path.join(BaseDirectory.xdg_config_home, 'mario', \
+        default_rule = os.path.join(BaseDirectory.xdg_config_home, 'mario', \
                                     'mario.plumb')
         try:
-            rule_file = open(defualt_rule)
+            rule_file = open(default_rule)
         except OSError as e:
             log.error(str(e))
             return -1
