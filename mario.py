@@ -227,26 +227,28 @@ def parse_arguments():
     return parser.parse_args()
 
 
-def main():
-    args = parse_arguments()
-
-    verbosity = log.DEBUG
-
-    if args.verbose:
+def setup_logger(verbosity):
+    if verbosity:
         log_levels = {
             1 : log.WARNING,
             2 : log.INFO,
             3 : log.DEBUG
         }
         try:
-            verbosity = log_levels[args.verbose]
+            verbosity = log_levels[verbosity]
         except KeyError:
             verbosity = log.DEBUG
 
-    if args.verbose:
         log.basicConfig(format='%(levelname)s:\t%(message)s', level=verbosity)
+
     else:
         log.basicConfig(format='%(levelname)s:\t%(message)s')
+
+
+def main():
+    args = parse_arguments()
+
+    setup_logger(args.verbose)
 
     if args.kind:
         args.kind = Kind[args.kind]
