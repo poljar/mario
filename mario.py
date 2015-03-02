@@ -217,6 +217,8 @@ def main():
                         choices=[str(k).strip('Kind.') for k in Kind])
     group.add_argument('--guess',  action='store_true',
                        help='guess the kind of the message')
+    parser.add_argument('--rule', type=argparse.FileType('r'),
+                        help='rule file to use')
 
     args = parser.parse_args()
 
@@ -269,13 +271,16 @@ def main():
 
     rule_file = None
 
-    defualt_rule = os.path.join(BaseDirectory.xdg_config_home, 'mario', \
-                                'mario.plumb')
-    try:
-        rule_file = open(defualt_rule)
-    except OSError as e:
-        log.error(str(e))
-        return -1
+    if args.rule:
+        rule_file = args.rule
+    else:
+        defualt_rule = os.path.join(BaseDirectory.xdg_config_home, 'mario', \
+                                    'mario.plumb')
+        try:
+            rule_file = open(defualt_rule)
+        except OSError as e:
+            log.error(str(e))
+            return -1
 
     log.info('Using config file {}'.format(rule_file.name))
     config.read_file(rule_file)
