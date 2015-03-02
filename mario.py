@@ -261,10 +261,10 @@ def parse_rules(args):
             log.error(str(e))
             return -1
 
-    log.info('Using config file {}'.format(rule_file.name))
+    log.info('Using rule file {}'.format(rule_file.name))
     config.read_file(rule_file)
     rule_file.close()
-    log.info('Config parsed.')
+    log.info('Rule parsed.')
 
     config.remove_section('mario')
 
