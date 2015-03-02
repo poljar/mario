@@ -40,7 +40,8 @@ def kind_is_func(msg, arguments, match_group):
 def arg_is_func(msg, arguments, match_group):
     arg, checks = arguments.split(maxsplit=1)
 
-    return arg.format(*match_group, **msg) in checks.split('\n'), msg, match_group
+    ret = arg.format(*match_group, **msg) in checks.split('\n')
+    return ret, msg, match_group
 
 
 def data_is_func(msg, arguments, match_group):
@@ -196,7 +197,8 @@ def handle_rules(msg, config):
             log.info('Rule [%s] matched.', rule)
             for opt in action_options:
                 action = config.get(rule, opt)
-                log.info('\tExecuting action "%s = %s" for rule [%s].', opt, action, rule)
+                log.info('\tExecuting action "%s = %s" for rule [%s].',
+                         opt, action, rule)
                 f = action_rules[opt]
                 res, msg, match_group = f(msg, action, match_group)
                 if not res:
@@ -211,12 +213,14 @@ def main():
     parser.add_argument('-v', '--verbose', action='count',
                         help='increase log verbosity level (pass multiple times)')
     parser.add_argument('msg', help='message to handle')
+
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('kind', help='kind of message',
-                        nargs='?',
-                        choices=[str(k).strip('Kind.') for k in Kind])
+                       nargs='?',
+                       choices=[str(k).strip('Kind.') for k in Kind])
     group.add_argument('--guess',  action='store_true',
                        help='guess the kind of the message')
+
     parser.add_argument('--rule', type=argparse.FileType('r'),
                         help='rule file to use')
 
