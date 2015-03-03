@@ -83,6 +83,10 @@ class ParserTest(unittest.TestCase):
         res = parse_rule_string(parser, rule)
         self.assertEqual(result, res)
 
+    def test_validate_parser(self):
+        parser = make_parser()
+        parser.validate()
+
     def test_simple_rule(self):
         self.parser_test_helper(simple_rule, simple_res)
 
