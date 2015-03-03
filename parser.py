@@ -73,7 +73,8 @@ def make_parser():
                  MatchLines('match-lines') + EOL + \
                  ActionLines('act-lines'))
 
-    RuleFile = Rule('rule') + ZeroOrMore(EOL + Rule('rule')) + StringEnd()
+    RuleFile = Rule('rule') + ZeroOrMore(EOL + Rule('rule')) + \
+               ZeroOrMore(EOL) + StringEnd()
     RuleFile = RuleFile('rules')
 
     RuleFile.ignore(Comment)
