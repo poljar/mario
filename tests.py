@@ -3,11 +3,11 @@ import unittest
 from parser import make_parser, parse_rule_string
 
 
-rule_test1 = '''[test]
+simple_rule = '''[test]
 arg matches {data} regex_string
 plumb open firefox'''
 
-rule_res1 = [
+simple_res = [
                 ['test', (
                     [
                         ['arg', 'matches', '{data}', ['regex_string']]
@@ -19,12 +19,12 @@ rule_res1 = [
             ]
 
 
-rule_test2 = '''[test]
+multiple_margs_rule = '''[test]
 arg matches {data} regex_string
                    regex_inbetween
 plumb open firefox'''
 
-rule_res2 = [
+multiple_margs_res = [
                 ['test', (
                     [
                         ['arg', 'matches', '{data}', ['regex_string', 'regex_inbetween']]], \
@@ -35,7 +35,7 @@ rule_res2 = [
             ]
 
 
-rule_test3 = '''[test]
+multiple_rules = '''[test]
 arg matches {data} regex_string
                    regex_inbetween
 plumb open firefox
@@ -43,7 +43,7 @@ plumb open firefox
 arg is {data} something
 plumb open echo {data}'''
 
-rule_res3 = [
+multiple_res = [
                 ['test', (
                     [
                         ['arg', 'matches', '{data}', ['regex_string', 'regex_inbetween']]
@@ -80,23 +80,23 @@ plumb open firefox
 class ParserTest(unittest.TestCase):
     def test_simple_rule(self):
         parser = make_parser()
-        result = parse_rule_string(parser, rule_test1)
-        self.assertEqual(result, rule_res1)
+        result = parse_rule_string(parser, simple_rule)
+        self.assertEqual(result, simple_res)
 
     def test_multiple_match_args(self):
         parser = make_parser()
-        result = parse_rule_string(parser, rule_test2)
-        self.assertEqual(result, rule_res2)
+        result = parse_rule_string(parser, multiple_margs_rule)
+        self.assertEqual(result, multiple_margs_res)
 
     def test_multiple_rules(self):
         parser = make_parser()
-        result = parse_rule_string(parser, rule_test3)
-        self.assertEqual(result, rule_res3)
+        result = parse_rule_string(parser, multiple_rules)
+        self.assertEqual(result, multiple_res)
 
     def test_rule_with_comment(self):
         parser = make_parser()
         result = parse_rule_string(parser, rule_with_comment)
-        self.assertEqual(result, rule_res1)
+        self.assertEqual(result, simple_res)
 
 if __name__ == '__main__':
         unittest.main()
