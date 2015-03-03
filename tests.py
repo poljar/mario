@@ -78,25 +78,22 @@ plumb open firefox
 
 
 class ParserTest(unittest.TestCase):
-    def test_simple_rule(self):
+    def parser_test_helper(self, rule, result):
         parser = make_parser()
-        result = parse_rule_string(parser, simple_rule)
-        self.assertEqual(result, simple_res)
+        res = parse_rule_string(parser, rule)
+        self.assertEqual(result, res)
+
+    def test_simple_rule(self):
+        self.parser_test_helper(simple_rule, simple_res)
 
     def test_multiple_match_args(self):
-        parser = make_parser()
-        result = parse_rule_string(parser, multiple_margs_rule)
-        self.assertEqual(result, multiple_margs_res)
+        self.parser_test_helper(multiple_margs_rule, multiple_margs_res)
 
     def test_multiple_rules(self):
-        parser = make_parser()
-        result = parse_rule_string(parser, multiple_rules)
-        self.assertEqual(result, multiple_res)
+        self.parser_test_helper(multiple_rules, multiple_res)
 
     def test_rule_with_comment(self):
-        parser = make_parser()
-        result = parse_rule_string(parser, rule_with_comment)
-        self.assertEqual(result, simple_res)
+        self.parser_test_helper(rule_with_comment, simple_res)
 
 if __name__ == '__main__':
         unittest.main()
