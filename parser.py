@@ -57,7 +57,7 @@ def make_parser():
                    Keyword('download')
 
     ActionArg = Combine(Word(printables) + \
-                ZeroOrMore(OneOrMore(' ') + Word(printables)))
+                ZeroOrMore(OneOrMore(' ') + NotAny('#') + Word(printables)))
 
     ActionRule = Group(ActionObject('object') + WS + \
                        ActionVerb('verb')     + WS + \

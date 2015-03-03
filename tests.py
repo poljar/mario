@@ -72,7 +72,7 @@ arg matches {data} regex_string # commenting is fun
 
    # maybe here with some whitespace?
 
-plumb open firefox
+plumb open firefox # inline commenting wherever I want
 
 #even here ?'''
 
