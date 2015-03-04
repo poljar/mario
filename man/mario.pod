@@ -1,0 +1,99 @@
+=encoding utf8
+
+=head1 NAME
+
+B<mario> - a plumber
+
+=head1 SYNOPSIS
+
+B<mario> [I<options>] I<MSG> {raw, url}
+
+=head1 DESCRIPTION
+
+B<mario> is a powerful plumber.
+
+=head1 OPTIONS
+
+=over 4
+
+=item B<--config> I<FILE>
+
+Configuration file to use.
+
+=item B<--guess>
+
+Guess the kind of the message.
+
+=item B<-h, --help>
+
+Display the help message and quit.
+
+=item B<--rule> I<FILE>
+
+Rules file to use.
+
+=item B<-v, --verbose>
+
+Increase the configured verbosity level  by  one. Specify multiple times to
+increase log level multiple times.
+
+=back
+
+=head1 ENVIRONMENT
+
+B<mario> will use the following environment variables for the B<plumb send to>
+I<port> action:
+
+=over 4
+
+=item B<BROWSER>
+
+#TODO
+
+=item B<EDITOR>
+
+#TODO
+
+=back
+
+=head1 FILES
+
+=over 4
+
+=item B<$XDG_CONFIG_HOME/mario/config>
+
+Global configuration file for mario.
+
+=item B<$XDG_CONFIG_HOME/mario/config>
+
+Default rules file for mario.
+
+=back
+
+=head1 EXIT STATUS
+
+B<mario> exits 0 if a rule successfully matches and all actions run successfully
+execute, and >0 if an error occurs.
+
+=head1 EXAMPLES
+
+=over 2
+
+=item A simple example using an URL as the message:
+
+B<mario> I<http://www.example.org/> I<url>
+
+=back
+
+=head1 SEE ALSO
+
+B<mario.plumb>(5), B<mario.config>(5)
+
+=head1 HISTORY
+
+B<mario> was inspired by the Plan 9 utility B<plumb> and the matching file server
+B<plumber>.
+
+=head1 AUTHORS
+
+Damir Jelić, Denis Kasak
