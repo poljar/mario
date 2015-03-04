@@ -222,7 +222,7 @@ def parse_arguments():
                        help='guess the kind of the message')
 
     parser.add_argument('--config', type=argparse.FileType('r'),
-                        help='rule file to use')
+                        help='config file to use')
     parser.add_argument('--rule', type=argparse.FileType('r'),
                         help='rule file to use')
 
