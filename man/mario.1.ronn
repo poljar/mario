@@ -1,0 +1,69 @@
+mario(1) -- a plumber
+=====================
+
+## SYNOPSIS
+
+`mario` [*options*] *MSG* {raw, url}
+
+## DESCRIPTION
+
+`mario` is a powerful plumber.
+
+## OPTIONS
+* `--config` `FILE`:
+    Configuration file to use.
+
+* `--guess`:
+    Guess the kind of the message.
+
+* `-h`, `--help`:
+    Display the help message and quit.
+
+* `--rule` *FILE*:
+    Rules file to use.
+
+* `-v`, `--verbose`:
+    Increase the configured verbosity level  by  one. Specify multiple times to
+    increase log level multiple times.
+
+## ENVIRONMENT
+
+* `BROWSER`:
+    TODO
+
+* `EDITOR`:
+    IS THIS SOME KIND OF JOKE?
+
+* `ONLY IF I'M AN EDITOR?`:
+    lol...
+
+## FILES
+
+* `$XDG_CONFIG_HOME/mario/config`:
+    Global configuration file for mario.
+
+* `$XDG_CONFIG_HOME/mario/config`:
+    Default rules file for mario.
+
+## EXIT STATUS
+
+`mario` exits 0 if a rule successfully matches and all actions run successfully
+execute, and >0 if an error occurs.
+
+## EXAMPLES
+
+* A simple example using an URL as the message:
+    `mario` *http://www.example.org/* *url*
+
+## SEE ALSO
+
+`mario.plumb`(5), `mario.config`(5)
+
+## HISTORY
+
+`mario` was inspired by the Plan 9 utility `plumb` and the matching file server
+`plumber`.
+
+## AUTHORS
+
+Damir Jelić, Denis Kasak
