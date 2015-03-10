@@ -32,10 +32,7 @@ mario(1) -- a plumber
     TODO
 
 * `EDITOR`:
-    IS THIS SOME KIND OF JOKE?
-
-* `ONLY IF I'M AN EDITOR?`:
-    lol...
+    TODO
 
 ## FILES
 
