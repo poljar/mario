@@ -52,7 +52,7 @@ execute, and >0 if an error occurs.
 
 ## EXAMPLES
 
-* A simple example using an URL as the message:
+* A simple example using an URL as the message::
     `mario` *http://www.example.org/* *url*
 
 ## SEE ALSO
