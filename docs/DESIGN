@@ -1,0 +1,116 @@
+Meaningful sentences
+====================
+
+Incomplete.
+
+[] and <> are metasymbols. [] signifies multiple choices, <> signifies
+categories (types?).
+
+    kind        is                      [url, file, raw]
+    data        [is, istype, matches]   [<string>]
+    {<var>}     [is, matches]           [<string>]
+
+
+Kind-specific objects
+=====================
+
+Objects (or variables?) we would need to pre-exist for a specific kind if we
+choose not to have kind objects and corresponding functions. The list is
+possibly incomplete.
+
+kind url
+--------
+
+data
+url
+
+
+kind file
+---------
+
+data
+path
+directory
+filename
+
+
+kind raw
+--------
+
+data
+
+
+Ideas
+=====
+
+kind mail
+---------
+
+Relatively obvious, possibly unbaked.
+
+
+variable objects
+----------------
+
+Variables could be promoted to objects (does this terminology make sense?) by
+using the `{var}` syntax. This would probably obviate the need for `arg`. What
+would the type(s) of this expression be?
+
+
+kind objects
+------------
+
+Every kind (except raw?) creates a special object with the same name as the
+kind. This object refers to the target of the message in a high-level way and
+is used as a target for functions such as filesize or pathof (for kind file) or
+schema or domain (for kind url).
+
+
+types
+-----
+
+All values should probably have types. This will increase type-safety and help
+ensure everything is meaningful during design of new features. [Kind
+objects](kind-objects) should have a type named after their kind (but
+uppercase). Other types we need include String and possibly a number type
+(filesizes?). We also need to think how we handle permissions (perhaps via
+a set of functions, e.g. userReadable, groupWriteable, ownerOf, etc.)
+
+
+object (variable?) functions
+----------------------------
+
+Functions operating on objects and variables (preferably typed).  Examples
+include filesize, pathof, directory, schema, domain, tld, etc.  These would be
+naturally combined with the idea of [kind objects](kind-objects) by having
+functions specific to some kind object.
+
+### Examples (with type signatures)
+
+filesize :: File -> Int?
+filename :: File -> String
+pathof :: File -> String
+directory :: File -> String
+tld :: Url -> String
+schema :: Url -> String
+domain :: Url -> String
+
+
+default kind promotion rules
+----------------------------
+
+    [file-promotion]
+    kind is raw
+    isfile data
+    set kind file
+    # set filename
+    # set path
+    # set directory
+    .
+    .
+    .
+    replumb
+
+Bad: Supplying default rules could have unwanted interactions with user rules,
+the most obvious one being that it's not possible to replumb anymore if there
+is a 1-replumb restriction in place and this is not special-cased.
