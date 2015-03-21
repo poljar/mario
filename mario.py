@@ -240,7 +240,7 @@ def parse_arguments():
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('kind', help='kind of message',
                        nargs='?',
-                       choices=[str(k).strip('Kind.') for k in Kind])
+                       choices=[k.name for k in Kind])
     group.add_argument('--guess',  action='store_true',
                        help='guess the kind of the message')
 
@@ -249,7 +249,12 @@ def parse_arguments():
     parser.add_argument('--rule', type=argparse.FileType('r'),
                         help='rule file to use')
 
-    return parser.parse_args()
+    args = parser.parse_args()
+
+    if args.kind:
+        args.kind = Kind[args.kind]
+
+    return args
 
 
 def setup_logger(verbosity):
@@ -337,9 +342,6 @@ def main():
     setup_logger(args.verbose)
 
     config = parse_config(args)
-
-    if args.kind:
-        args.kind = Kind[args.kind]
 
     if args.guess:
         log.info('Using heuristics to guess kind...')
