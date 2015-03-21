@@ -24,6 +24,20 @@ class Kind(Enum):
     raw = 1
     url = 2
 
+def lookup_content_type(url):
+    request = urllib.request.Request(url=url, method='HEAD')
+
+    try:
+        request = urllib.request.urlopen(request)
+        response = request.getheader('Content-Type')
+    except (HTTPError, URLError):
+        return None, None
+
+    if ';' in response:
+        content_type, encoding = response.split(';', maxsplit=1)
+        return content_type, encoding.strip()
+
+    return response, None
 
 def get_var_references(s):
     tokens = s.split()
@@ -90,17 +104,8 @@ def data_istype_func(msg, arguments, match_group):
         t, _ = mimetypes.guess_type(msg['data'])
 
         if not t:
-            log.debug('Failed mimetype guessing... Downloading file and trying with magic.')
-
-            # FIXME: downloading files like this should be refactored into
-            # a separate function and used both here and in plumb_open_func
-            user_agent = 'Mozilla/5.0 (Windows NT 6.3; rv:36.0) Gecko/20100101 Firefox/36.0'
-
-            opener = urllib.request.build_opener()
-            opener.addheaders = [('User-agent', user_agent)]
-
-            data = opener.open(msg['data']).read()
-            t = magic.from_buffer(data, mime=True).decode('utf-8')
+            log.debug('Failed mimetype guessing... Trying Content-Type header.')
+            t, _ = lookup_content_type(msg['data'])
     elif msg['kind'] == Kind.raw:
         # magic returns the mimetype as bytes, hence the decode
         t = magic.from_buffer(msg['data'], mime=True).decode('utf-8')
