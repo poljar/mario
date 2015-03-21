@@ -97,32 +97,46 @@ def data_rewrite_func(msg, arguments, match_group):
     return arg_rewrite_func(msg, '{data} ' + arguments, match_group)
 
 
-def data_istype_func(msg, arguments, match_group):
-    log.debug('Executing clause \'data istype {}\''.format(arguments))
-
+def detect_mimetype(msg):
     if msg['kind'] == Kind.url:
         t, _ = mimetypes.guess_type(msg['data'])
 
         if not t:
             log.debug('Failed mimetype guessing... Trying Content-Type header.')
             t, _ = lookup_content_type(msg['data'])
+            if t:
+                log.debug('Content-Type: {}'.format(t))
+            else:
+                log.debug('Failed fetching Content-Type.')
     elif msg['kind'] == Kind.raw:
         # magic returns the mimetype as bytes, hence the decode
         t = magic.from_buffer(msg['data'], mime=True).decode('utf-8')
     else:
-        pass
+        t = None
+
+    return t
+
+
+def data_istype_func(msg, arguments, match_group):
+    log.debug("Executing clause 'data istype {}'".format(arguments))
+
+    if msg.get('type'):
+        t = msg['type']
+    else:
+        t = detect_mimetype(msg)
 
     if t:
         m = re.match(arguments, t)
+        msg['type'] = t
     else:
-        log.info("Couldn't determine mimetype.")
+        log.info("\tCouldn't determine mimetype.")
         return False, msg, match_group
 
     if m:
         log.debug('\tType matches: {}'.format(m.group()))
         return bool(m), msg, match_group
     else:
-        log.debug('\tType doesn\'t match or cannot guess type.')
+        log.debug("\tType {} doesn't match expression {}.".format(t, arguments))
         return False, msg, match_group
 
 
