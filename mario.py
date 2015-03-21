@@ -107,7 +107,11 @@ def data_istype_func(msg, arguments, match_group):
     else:
         pass
 
-    m = re.match(arguments, t)
+    if t:
+        m = re.match(arguments, t)
+    else:
+        log.info("Couldn't determine mimetype.")
+        return False, msg, match_group
 
     if m:
         log.debug('\tType matches: {}'.format(m.group()))
