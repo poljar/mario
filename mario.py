@@ -71,9 +71,8 @@ def arg_matches_func(msg, arguments, match_group):
 
         if m:
             return True, msg, match_group + m.groups()
-            break
-        else:
-            return False, msg, ()
+    else:
+        return False, msg, match_group
 
 
 def data_match_func(msg, arguments, match_group):
