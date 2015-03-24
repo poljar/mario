@@ -109,6 +109,22 @@ res_utf8_names = [
             ]
 
 
+multiple_variables_rule = '''[test]
+arg matches /bla/{data}/{another} regex_string
+plumb open firefox'''
+
+multiple_variables_res = [
+                ['test', (
+                    [
+                        ['arg', 'matches', '/bla/{data}/{another}', ['regex_string']]
+                    ],
+                    [
+                        ['plumb', 'open', 'firefox']]
+                    )
+                ]
+            ]
+
+
 class ParserTest(unittest.TestCase):
     def parser_test_helper(self, rule, result):
         parser = make_parser()
@@ -136,6 +152,9 @@ class ParserTest(unittest.TestCase):
 
     def test_utf8(self):
         self.parser_test_helper(rule_utf8_names, res_utf8_names)
+
+    def test_multiple_variables(self):
+        self.parser_test_helper(multiple_variables_rule, multiple_variables_res)
 
 if __name__ == '__main__':
         unittest.main()

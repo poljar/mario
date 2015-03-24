@@ -29,12 +29,8 @@ def make_parser():
     ArgTxt   = Word(utf8_printables)('arg')
 # TODO allow the excluded chars if they are escaped.
     NameTxt  = Word(utf8_printables, excludeChars='{ } [ ]')
-    VariableName = Combine('{' + NameTxt + '}')
-    VariableExtra = Word(utf8_printables, excludeChars='{ }')
 
-    Variable = VariableName ^ Combine(VariableExtra + VariableName) ^ \
-               Combine(VariableName + VariableExtra) ^ \
-               Combine(VariableExtra + VariableName + VariableExtra)
+    Variable = Word(utf8_printables)
 
     MatchArg = Group(ArgTxt + ZeroOrMore(EOL + indent + ArgTxt))
 
