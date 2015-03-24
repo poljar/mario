@@ -9,12 +9,10 @@ from pyparsing import *
 def make_parser():
     ParserElement.setDefaultWhitespaceChars('')
 
-# TODO make whitespace less strict
     EOL    = LineEnd().suppress()
     Space  = Literal(' ').suppress()
     Tab    = Literal('\t').suppress()
-    WS     = OneOrMore(Space)
-    indent = OneOrMore(Space) | OneOrMore(Tab)
+    WS     = OneOrMore(Space) | OneOrMore(Tab)
 
     Comment   = LineStart() + ZeroOrMore(' ') + '#' + restOfLine + EOL | \
                 OneOrMore(' ') + '#' + restOfLine
@@ -41,7 +39,7 @@ def make_parser():
                           KindVerbs('verb')     + WS + \
                           KindArgs('args'))
 
-    MatchArg = Group(ArgTxt + ZeroOrMore(EOL + indent + ArgTxt))
+    MatchArg = Group(ArgTxt + ZeroOrMore(EOL + WS + ArgTxt))
     MatchArg = MatchArg('arg')
 
     MatchObjects = Keyword('arg')
