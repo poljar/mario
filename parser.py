@@ -20,10 +20,15 @@ def make_parser():
                 OneOrMore(' ') + '#' + restOfLine
     BlankLine = LineStart() + ZeroOrMore(' ') + EOL
 
-# TODO SkipTo(EOL) Word -> Regex?
     ArgTxt   = Word(printables)('arg')
     NameTxt  = Word(alphas + nums + '-' + '_')
-    Variable = Combine('{' + NameTxt + '}')
+    VariableName = Combine('{' + NameTxt + '}')
+    VariableExtra = Word(printables, excludeChars='{ }')
+
+    Variable = VariableName ^ Combine(VariableExtra + VariableName) ^ \
+               Combine(VariableName + VariableExtra) ^ \
+               Combine(VariableExtra + VariableName + VariableExtra)
+
     MatchArg = Group(ArgTxt + ZeroOrMore(EOL + indent + ArgTxt))
 
     KindObjects = Keyword('kind')

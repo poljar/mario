@@ -77,6 +77,22 @@ plumb open firefox # inline commenting wherever I want
 #even here ?'''
 
 
+rule_complex_variable = '''[test]
+arg matches /bla/{data}/bla.py regex_string
+plumb open firefox'''
+
+complex_var_res = [
+                ['test', (
+                    [
+                        ['arg', 'matches', '/bla/{data}/bla.py', ['regex_string']]
+                    ],
+                    [
+                        ['plumb', 'open', 'firefox']]
+                    )
+                ]
+            ]
+
+
 class ParserTest(unittest.TestCase):
     def parser_test_helper(self, rule, result):
         parser = make_parser()
@@ -98,6 +114,9 @@ class ParserTest(unittest.TestCase):
 
     def test_rule_with_comment(self):
         self.parser_test_helper(rule_with_comment, simple_res)
+
+    def test_complex_var(self):
+        self.parser_test_helper(rule_complex_variable, complex_var_res)
 
 if __name__ == '__main__':
         unittest.main()
