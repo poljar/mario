@@ -93,6 +93,22 @@ complex_var_res = [
             ]
 
 
+rule_utf8_names = '''[čest]
+arg matches /bla/{data}/ćla.py regex_stringić # comments ¹²³
+plumb open firefȭx'''
+
+res_utf8_names = [
+                ['čest', (
+                    [
+                        ['arg', 'matches', '/bla/{data}/ćla.py', ['regex_stringić']]
+                    ],
+                    [
+                        ['plumb', 'open', 'firefȭx']]
+                    )
+                ]
+            ]
+
+
 class ParserTest(unittest.TestCase):
     def parser_test_helper(self, rule, result):
         parser = make_parser()
@@ -117,6 +133,9 @@ class ParserTest(unittest.TestCase):
 
     def test_complex_var(self):
         self.parser_test_helper(rule_complex_variable, complex_var_res)
+
+    def test_utf8(self):
+        self.parser_test_helper(rule_utf8_names, res_utf8_names)
 
 if __name__ == '__main__':
         unittest.main()

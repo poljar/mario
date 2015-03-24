@@ -20,10 +20,17 @@ def make_parser():
                 OneOrMore(' ') + '#' + restOfLine
     BlankLine = LineStart() + ZeroOrMore(' ') + EOL
 
-    ArgTxt   = Word(printables)('arg')
-    NameTxt  = Word(alphas + nums + '-' + '_')
+    alphas_extra = ''.join(chr(x) for x in range(0x100, 0x350))
+
+    # NOTE: this are not all 'printable' Unicode characters if needed expand the
+    # alphas_extra variable.
+    utf8_printables = printables + alphas8bit + alphas_extra
+
+    ArgTxt   = Word(utf8_printables)('arg')
+# TODO allow the excluded chars if they are escaped.
+    NameTxt  = Word(utf8_printables, excludeChars='{ } [ ]')
     VariableName = Combine('{' + NameTxt + '}')
-    VariableExtra = Word(printables, excludeChars='{ }')
+    VariableExtra = Word(utf8_printables, excludeChars='{ }')
 
     Variable = VariableName ^ Combine(VariableExtra + VariableName) ^ \
                Combine(VariableName + VariableExtra) ^ \
@@ -36,7 +43,6 @@ def make_parser():
     KindArgs    = Keyword('url')  | \
                   Keyword('raw')
 
-# TODO change the grammar when the kind changes
     KindMatchRule = Group(KindObjects('object') + WS + \
                           KindVerbs('verb')     + WS + \
                           KindArgs('args'))
@@ -53,7 +59,6 @@ def make_parser():
                          MatchArg('args'))
     ArgMatchRule = ArgMatchRule('match-rule')
 
-# TODO make the ArgMatchRule as well optional
     MatchLines = Group(Optional(KindMatchRule('kind-rule') + EOL) + \
                        ArgMatchRule + ZeroOrMore(EOL + ArgMatchRule))
 
@@ -61,8 +66,8 @@ def make_parser():
     ActionVerb   = Keyword('open')     | \
                    Keyword('download')
 
-    ActionArg = Combine(Word(printables) + \
-                ZeroOrMore(OneOrMore(' ') + NotAny('#') + Word(printables)))
+    ActionArg = Combine(Word(utf8_printables) + \
+                ZeroOrMore(OneOrMore(' ') + NotAny('#') + Word(utf8_printables)))
 
     ActionRule = Group(ActionObject('object') + WS + \
                        ActionVerb('verb')     + WS + \
