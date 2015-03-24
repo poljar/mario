@@ -96,23 +96,28 @@ def data_rewrite_func(msg, arguments, match_group):
     return arg_rewrite_func(msg, '{data} ' + arguments, match_group)
 
 
-def data_istype_func(msg, arguments, match_group):
-    log.debug('Executing clause \'data istype {}\''.format(arguments))
+def arg_istype_func(msg, arguments, match_group):
+    arg, patterns = arguments.split(maxsplit=1)
+    arg = arg.format(*match_group, **msg)
 
     if msg['kind'] == Kind.url:
-        t, _ = mimetypes.guess_type(msg['data'])
+        t, _ = mimetypes.guess_type(arg)
 
         if not t:
             log.debug('Failed mimetype guessing... Trying Content-Type header.')
-            t, _ = lookup_content_type(msg['data'])
+            t, _ = lookup_content_type(arg)
     elif msg['kind'] == Kind.raw:
         # magic returns the mimetype as bytes, hence the decode
-        t = magic.from_buffer(msg['data'], mime=True).decode('utf-8')
+        t = magic.from_buffer(arg, mime=True).decode('utf-8')
     else:
         pass
 
     if t:
-        m = re.match(arguments, t)
+        for pattern in patterns.split('\n'):
+            m = re.search(pattern, t)
+
+            if m:
+                break
     else:
         log.info("Couldn't determine mimetype.")
         return False, msg, match_group
@@ -123,6 +128,10 @@ def data_istype_func(msg, arguments, match_group):
     else:
         log.debug('\tType doesn\'t match or cannot guess type.')
         return False, msg, match_group
+
+
+def data_istype_func(msg, arguments, match_group):
+    return arg_istype_func(msg, '{data} ' + arguments, match_group)
 
 
 def plumb_open_func(msg, arguments, match_group):
@@ -165,6 +174,7 @@ def plumb_download_func(msg, arguments, match_group):
 match_rules = {
         'kind is'      : kind_is_func,
         'arg is'       : arg_is_func,
+        'arg istype'   : arg_istype_func,
         'data is'      : data_is_func,
         'data istype'  : data_istype_func,
         'arg matches'  : arg_matches_func,
