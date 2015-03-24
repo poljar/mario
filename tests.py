@@ -125,6 +125,11 @@ multiple_variables_res = [
             ]
 
 
+liberal_whitespace = '''[test] # co
+arg     matches         {data}         regex_string      #   white      space    
+plumb     open        firefox'''
+
+
 class ParserTest(unittest.TestCase):
     def parser_test_helper(self, rule, result):
         parser = make_parser()
@@ -155,6 +160,9 @@ class ParserTest(unittest.TestCase):
 
     def test_multiple_variables(self):
         self.parser_test_helper(multiple_variables_rule, multiple_variables_res)
+
+    def test_whitespace(self):
+        self.parser_test_helper(liberal_whitespace, simple_res)
 
 if __name__ == '__main__':
         unittest.main()
