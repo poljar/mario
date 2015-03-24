@@ -130,6 +130,17 @@ arg     matches         {data}         regex_string      #   white      space
 plumb     open        firefox'''
 
 
+data_object_rule = '''[test]
+data matches regex_string
+plumb open firefox'''
+
+
+data_multiple_margs_rule = '''[test]
+data matches regex_string
+             regex_inbetween
+plumb open firefox'''
+
+
 class ParserTest(unittest.TestCase):
     def parser_test_helper(self, rule, result):
         parser = make_parser()
@@ -163,6 +174,12 @@ class ParserTest(unittest.TestCase):
 
     def test_whitespace(self):
         self.parser_test_helper(liberal_whitespace, simple_res)
+
+    def test_data_object(self):
+        self.parser_test_helper(data_object_rule, simple_res)
+
+    def test_data_multiple_marg(self):
+        self.parser_test_helper(data_multiple_margs_rule, multiple_margs_res)
 
 if __name__ == '__main__':
         unittest.main()

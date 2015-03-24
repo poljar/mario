@@ -32,8 +32,6 @@ def make_parser():
 
     Variable = Word(utf8_printables)
 
-    MatchArg = Group(ArgTxt + ZeroOrMore(EOL + indent + ArgTxt))
-
     KindObjects = Keyword('kind')
     KindVerbs   = Keyword('is')
     KindArgs    = Keyword('url')  | \
@@ -43,20 +41,38 @@ def make_parser():
                           KindVerbs('verb')     + WS + \
                           KindArgs('args'))
 
+    MatchArg = Group(ArgTxt + ZeroOrMore(EOL + indent + ArgTxt))
+    MatchArg = MatchArg('arg')
+
     MatchObjects = Keyword('arg')
     MatchVerbs   = Keyword('is')      | \
                    Keyword('istype')  | \
                    Keyword('matches') | \
                    Keyword('rewrite')
+    MatchVerbs   = MatchVerbs('verb')
 
-    ArgMatchRule = Group(MatchObjects('object') + WS + \
-                         MatchVerbs('verb')     + WS + \
-                         Variable('var')        + WS + \
-                         MatchArg('args'))
+    ArgMatchRule = Group(Keyword('arg')('object') + WS + \
+                         MatchVerbs               + WS + \
+                         Variable('var')          + WS + \
+                         MatchArg)
     ArgMatchRule = ArgMatchRule('match-rule')
 
+    DataMatchRule = Group(Keyword('data')('object') + WS + \
+                          MatchVerbs                + WS + \
+                          MatchArg)
+    DataMatchRule = DataMatchRule('match-rule')
+
+    # Transform every 'data match' rule to an equivalent 'arg match' rule
+    def data_to_arg_rule(toks):
+        assert(len(toks) == 1)
+        return [['arg', toks[0]['verb'], '{data}', list(toks[0]['arg'])]]
+
+    DataMatchRule.setParseAction(data_to_arg_rule)
+
+    MatchRule = ArgMatchRule | DataMatchRule
+
     MatchLines = Group(Optional(KindMatchRule('kind-rule') + EOL) + \
-                       ArgMatchRule + ZeroOrMore(EOL + ArgMatchRule))
+                       MatchRule + ZeroOrMore(EOL + MatchRule))
 
     ActionObject = Keyword('plumb')
     ActionVerb   = Keyword('open')     | \
