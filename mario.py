@@ -145,7 +145,13 @@ def plumb_open_func(msg, arguments, match_group):
     vs = get_var_references(arguments)
     for v in vs:
         var_name = v.strip('{}')
-        log.info('\t\t{var} = {value}'.format(var=v, value=msg[var_name]))
+        try:
+            var_name = int(var_name)
+            log.info('\t\t{{{var}}} = {value}'.format(
+                var=var_name,
+                value=match_group[var_name]))
+        except ValueError:
+            log.info('\t\t{var} = {value}'.format(var=v, value=msg[var_name]))
 
     ret = subprocess.call(tmp.split())
     if ret == 0:
