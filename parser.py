@@ -70,7 +70,8 @@ def make_parser():
     MatchRule = ArgMatchRule | DataMatchRule
 
     MatchLines = Group(Optional(KindMatchRule('kind-rule') + EOL) + \
-                       MatchRule + ZeroOrMore(EOL + MatchRule))
+                       MatchRule + ZeroOrMore(EOL + MatchRule)) | \
+                 Group(KindMatchRule('kind-rule'))
 
     ActionObject = Keyword('plumb')
     ActionVerb   = Keyword('open')     | \
