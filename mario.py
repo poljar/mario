@@ -96,6 +96,27 @@ def data_rewrite_func(msg, arguments, match_group):
     return arg_rewrite_func(msg, '{data} ' + arguments, match_group)
 
 
+def mime_from_buffer(buf):
+    try:
+        # magic returns the mimetype as bytes, hence the decode
+        t = magic.from_buffer(buf, mime=True).decode('utf-8')
+    except AttributeError:
+        try:
+            m = magic.open(magic.MIME)
+            m.load()
+            t, _ = m.buffer(buf.encode('utf-8')).split(';')
+        except AttributeError as e:
+            log.error('Your \'magic\' module is unsupported. ' + \
+                    'Install either https://github.com/ahupp/python-magic ' + \
+                    'or https://github.com/file/file/tree/master/python ' + \
+                    '(official \'file\' python bindings, available as the ' + \
+                    'python-magic package on many distros)')
+
+            raise SystemExit
+
+    return t
+
+
 def arg_istype_func(msg, arguments, match_group):
     arg, patterns = arguments.split(maxsplit=1)
     arg = arg.format(*match_group, **msg)
@@ -107,8 +128,7 @@ def arg_istype_func(msg, arguments, match_group):
             log.debug('Failed mimetype guessing... Trying Content-Type header.')
             t, _ = lookup_content_type(arg)
     elif msg['kind'] == Kind.raw:
-        # magic returns the mimetype as bytes, hence the decode
-        t = magic.from_buffer(arg, mime=True).decode('utf-8')
+        t = mime_from_buffer(arg)
     else:
         pass
 
