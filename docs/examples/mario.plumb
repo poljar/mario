@@ -1,22 +1,21 @@
 [ISBN]
-kind is = raw
-data istype = text/plain
-data matches = (isbn):([0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9])
-plumb open = firefox http://www.amazon.com/s/?field-isbn={1}
+kind is raw
+data istype text/plain
+data matches (isbn):([0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9])
+plumb open firefox http://www.amazon.com/s/?field-isbn={1}
 
 [github]
-kind is = url
-arg is = {netloc} github.com
-data istype = text/x-python
-arg rewrite = {data}
-                github.com,raw.githubusercontent.com
-                blob/,
-plumb open = firefox {data}
+kind is url
+arg is {netloc} github.com
+data istype text/x-python
+arg rewrite {data} github.com,raw.githubusercontent.com
+                   blob/,
+plumb open firefox {data}
 
 [url-fallback]
-kind is = url
-plumb open = firefox {data}
+kind is url
+plumb open firefox {data}
 
 [raw-fallback]
-kind is = raw
-plumb open = echo "woohoo {data}"
+kind is raw
+plumb open echo "woohoo {data}"

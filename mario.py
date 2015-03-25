@@ -20,6 +20,8 @@ from functools import reduce
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlparse
 
+from parser import make_parser, parse_rule_file
+
 class Kind(Enum):
     raw = 1
     url = 2
@@ -46,15 +48,15 @@ def get_var_references(s):
 
 def kind_is_func(msg, arguments, match_group):
     try:
-        return msg['kind'] == Kind[arguments], msg, match_group
+        return msg['kind'] == Kind[arguments[0]], msg, match_group
     except KeyError:
         return False, msg, match_group
 
 
 def arg_is_func(msg, arguments, match_group):
-    arg, checks = arguments.split(maxsplit=1)
+    arg, checks = arguments
 
-    ret = arg.format(*match_group, **msg) in checks.split('\n')
+    ret = arg.format(*match_group, **msg) in checks
     return ret, msg, match_group
 
 
@@ -63,10 +65,10 @@ def data_is_func(msg, arguments, match_group):
 
 
 def arg_matches_func(msg, arguments, match_group):
-    arg, patterns = arguments.split(maxsplit=1)
+    arg, patterns = arguments
     arg = arg.format(*match_group, **msg)
 
-    for pattern in patterns.split('\n'):
+    for pattern in patterns:
         m = re.search(pattern, arg)
 
         if m:
@@ -80,12 +82,12 @@ def data_match_func(msg, arguments, match_group):
 
 
 def arg_rewrite_func(msg, arguments, match_group):
-    arg, patterns = arguments.split(maxsplit=1)
+    arg, patterns = arguments
     tmp = arg.format(*match_group, **msg)
     arg = arg.strip('{}')
 
     f = lambda acc, pattern: acc.replace(*pattern.split(',', 2))
-    tmp = reduce(f, patterns.split('\n'), tmp)
+    tmp = reduce(f, patterns, tmp)
 
     msg[arg] = tmp
 
@@ -118,7 +120,7 @@ def mime_from_buffer(buf):
 
 
 def arg_istype_func(msg, arguments, match_group):
-    arg, patterns = arguments.split(maxsplit=1)
+    arg, patterns = arguments
     arg = arg.format(*match_group, **msg)
 
     if msg['kind'] == Kind.url:
@@ -133,7 +135,7 @@ def arg_istype_func(msg, arguments, match_group):
         pass
 
     if t:
-        for pattern in patterns.split('\n'):
+        for pattern in patterns:
             m = re.search(pattern, t)
 
             if m:
@@ -209,21 +211,23 @@ action_rules = {
 }
 
 
-def handle_rules(msg, config):
+def handle_rules(msg, rules):
     log.info('Matching message against rules.')
 
-    for rule in config.sections():
-        log.debug('Matching against rule [%s]', rule)
+    for rule in rules:
+        rule_name, rule_lines = rule
+
+        match_lines, action_lines = rule_lines
+        log.debug('Matching against rule [%s]', rule_name)
 
         match_group = ()
-        options = config.options(rule)
 
-        match_options  = (opt for opt in options if opt in match_rules)
-        action_options = (opt for opt in options if opt in action_rules)
+        for line in match_lines:
+            obj, verb = line[0:2]
+            arguments = line[2:]
 
-        for opt in match_options:
-            f = match_rules[opt]
-            res, msg, match_group = f(msg, config.get(rule, opt), match_group)
+            f = match_rules[obj + ' ' + verb]
+            res, msg, match_group = f(msg, line[2:], match_group)
 
             if not res:
                 rule_matched = False
@@ -232,12 +236,12 @@ def handle_rules(msg, config):
             rule_matched = True
 
         if rule_matched:
-            log.info('Rule [%s] matched.', rule)
-            for opt in action_options:
-                action = config.get(rule, opt)
+            log.info('Rule [%s] matched.', rule_name)
+            for line in action_lines:
+                obj, verb, action = line
                 log.info('\tExecuting action "%s = %s" for rule [%s].',
-                         opt, action, rule)
-                f = action_rules[opt]
+                         obj + ' ' + verb, action, rule_name)
+                f = action_rules[obj + ' ' + verb]
                 res, msg, match_group = f(msg, action, match_group)
                 if not res:
                     break
@@ -291,7 +295,7 @@ def setup_logger(verbosity):
 
 
 def parse_rules(args, config):
-    parser = configparser.ConfigParser()
+    parser = make_parser()
 
     rule_file = None
 
@@ -306,11 +310,11 @@ def parse_rules(args, config):
             return -1
 
     log.info('Using rule file {}'.format(rule_file.name))
-    parser.read_file(rule_file)
+    rules = parse_rule_file(parser, rule_file)
     rule_file.close()
     log.info('Rules parsed.')
 
-    return parser
+    return rules
 
 
 def parse_config(args):
