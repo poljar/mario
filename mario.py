@@ -60,10 +60,6 @@ def arg_is_func(msg, arguments, match_group):
     return ret, msg, match_group
 
 
-def data_is_func(msg, arguments, match_group):
-    return arg_is_func(mgs, '{data} ' + arguments, match_group)
-
-
 def arg_matches_func(msg, arguments, match_group):
     arg, patterns = arguments
     arg = arg.format(*match_group, **msg)
@@ -77,10 +73,6 @@ def arg_matches_func(msg, arguments, match_group):
         return False, msg, match_group
 
 
-def data_match_func(msg, arguments, match_group):
-    return arg_matches_func(msg, '{data} ' + arguments, match_group)
-
-
 def arg_rewrite_func(msg, arguments, match_group):
     arg, patterns = arguments
     tmp = arg.format(*match_group, **msg)
@@ -92,10 +84,6 @@ def arg_rewrite_func(msg, arguments, match_group):
     msg[arg] = tmp
 
     return True, msg, match_group
-
-
-def data_rewrite_func(msg, arguments, match_group):
-    return arg_rewrite_func(msg, '{data} ' + arguments, match_group)
 
 
 def mime_from_buffer(buf):
@@ -152,10 +140,6 @@ def arg_istype_func(msg, arguments, match_group):
         return False, msg, match_group
 
 
-def data_istype_func(msg, arguments, match_group):
-    return arg_istype_func(msg, '{data} ' + arguments, match_group)
-
-
 def plumb_open_func(msg, arguments, match_group):
     tmp = arguments.format(*match_group, **msg)
 
@@ -197,12 +181,8 @@ match_rules = {
         'kind is'      : kind_is_func,
         'arg is'       : arg_is_func,
         'arg istype'   : arg_istype_func,
-        'data is'      : data_is_func,
-        'data istype'  : data_istype_func,
         'arg matches'  : arg_matches_func,
-        'data matches' : data_match_func,
         'arg rewrite'  : arg_rewrite_func,
-        'data rewrite' : data_rewrite_func,
 }
 
 action_rules = {
