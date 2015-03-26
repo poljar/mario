@@ -1,6 +1,6 @@
 import unittest
 
-from parser import make_parser, parse_rule_string
+from mario.parser import make_parser, parse_rule_string
 
 
 simple_rule = '''[test]

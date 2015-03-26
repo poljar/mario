@@ -14,9 +14,10 @@ setup(name = 'mario',
       author = 'Damir Jelić, Denis Kasak',
       author_email = 'poljar[at]termina.org.uk, dkasak[at]termina.org.uk',
       description = ('A simple plumber'),
+      packages = ['mario'],
       install_requires = [magic_module, 'pyxdg'],
       license = 'ISC',
       entry_points = {
-          "console_scripts" : ['mario = mario:main']
-          }
-     )
+          "console_scripts" : ['mario = mario.core:main']
+      }
+)

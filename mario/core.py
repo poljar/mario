@@ -20,7 +20,7 @@ from functools import reduce
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlparse
 
-from parser import make_parser, parse_rule_file
+from mario.parser import make_parser, parse_rule_file
 
 class Kind(Enum):
     raw = 1
