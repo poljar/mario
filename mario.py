@@ -157,19 +157,17 @@ def plumb_open_func(msg, arguments, match_group):
 
 
 def plumb_download_func(msg, arguments, match_group):
-    if msg['kind'] != Kind.url:
-        return False, msg, match_group
-
     user_agent = 'Mozilla/5.0 (Windows NT 6.3; rv:36.0) Gecko/20100101 Firefox/36.0'
-
     opener = urllib.request.build_opener()
     opener.addheaders = [('User-agent', user_agent)]
 
     tmp_dir = tempfile.gettempdir()
 
+    target = arguments.format(*match_group, **msg)
+
     try:
         with tempfile.NamedTemporaryFile(prefix='plumber-', dir=tmp_dir, delete=False) as f:
-            f.write(opener.open(msg['data']).read())
+            f.write(opener.open(target).read())
             msg['filename'] = f.name
             return True, msg, match_group
     except OSError as e:
