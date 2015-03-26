@@ -107,20 +107,32 @@ def mime_from_buffer(buf):
     return t
 
 
+def detect_mimetype(kind, var):
+    if kind == Kind.url:
+        t, _ = mimetypes.guess_type(var)
+
+        if not t:
+            log.debug('Failed mimetype guessing... Trying Content-Type header.')
+            t, _ = lookup_content_type(var)
+
+            if t:
+                log.debug('Content-Type: {}'.format(t))
+            else:
+                log.debug('Failed fetching Content-Type.')
+
+    elif kind == Kind.raw:
+        t = mime_from_buffer(var)
+    else:
+        t = None
+
+    return t
+
+
 def arg_istype_func(msg, arguments, match_group):
     arg, patterns = arguments
     arg = arg.format(*match_group, **msg)
 
-    if msg['kind'] == Kind.url:
-        t, _ = mimetypes.guess_type(arg)
-
-        if not t:
-            log.debug('Failed mimetype guessing... Trying Content-Type header.')
-            t, _ = lookup_content_type(arg)
-    elif msg['kind'] == Kind.raw:
-        t = mime_from_buffer(arg)
-    else:
-        pass
+    t = detect_mimetype(msg['kind'], arg)
 
     if t:
         for pattern in patterns:
