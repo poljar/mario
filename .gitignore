@@ -1,3 +1,8 @@
+mario.egg-info/
+.eggs/
+__pycache__/
 build/
 dist/
-mario.egg-info/
+bin/
+include/
+lib/
