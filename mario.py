@@ -46,21 +46,21 @@ def get_var_references(s):
     return (t for t in tokens if t[0] == '{' and t[-1] == '}')
 
 
-def kind_is_func(msg, arguments, match_group):
+def kind_is_func(msg, arguments, match_group, cache):
     try:
-        return msg['kind'] == Kind[arguments[0]], msg, match_group
+        return msg['kind'] == Kind[arguments[0]], msg, match_group, cache
     except KeyError:
-        return False, msg, match_group
+        return False, msg, match_group, cache
 
 
-def arg_is_func(msg, arguments, match_group):
+def arg_is_func(msg, arguments, match_group, cache):
     arg, checks = arguments
 
     ret = arg.format(*match_group, **msg) in checks
-    return ret, msg, match_group
+    return ret, msg, match_group, cache
 
 
-def arg_matches_func(msg, arguments, match_group):
+def arg_matches_func(msg, arguments, match_group, cache):
     arg, patterns = arguments
     arg = arg.format(*match_group, **msg)
 
@@ -68,12 +68,12 @@ def arg_matches_func(msg, arguments, match_group):
         m = re.search(pattern, arg)
 
         if m:
-            return True, msg, match_group + m.groups()
+            return True, msg, match_group + m.groups(), cache
     else:
-        return False, msg, match_group
+        return False, msg, match_group, cache
 
 
-def arg_rewrite_func(msg, arguments, match_group):
+def arg_rewrite_func(msg, arguments, match_group, cache):
     arg, patterns = arguments
     tmp = arg.format(*match_group, **msg)
     arg = arg.strip('{}')
@@ -83,7 +83,7 @@ def arg_rewrite_func(msg, arguments, match_group):
 
     msg[arg] = tmp
 
-    return True, msg, match_group
+    return True, msg, match_group, cache
 
 
 def mime_from_buffer(buf):
@@ -128,13 +128,20 @@ def detect_mimetype(kind, var):
     return t
 
 
-def arg_istype_func(msg, arguments, match_group):
+def arg_istype_func(msg, arguments, match_group, cache):
     arg, patterns = arguments
     arg = arg.format(*match_group, **msg)
 
-    t = detect_mimetype(msg['kind'], arg)
+    type_cache = cache['type']
+
+    if arg in type_cache.keys():
+        t = type_cache[arg]
+    else:
+        t = detect_mimetype(msg['kind'], arg)
 
     if t:
+        type_cache[arg] = t
+
         for pattern in patterns:
             m = re.search(pattern, t)
 
@@ -142,14 +149,14 @@ def arg_istype_func(msg, arguments, match_group):
                 break
     else:
         log.info("Couldn't determine mimetype.")
-        return False, msg, match_group
+        return False, msg, match_group, cache
 
     if m:
         log.debug('\tType matches: {}'.format(m.group()))
-        return bool(m), msg, match_group
+        return bool(m), msg, match_group, cache
     else:
         log.debug('\tType doesn\'t match or cannot guess type.')
-        return False, msg, match_group
+        return False, msg, match_group, cache
 
 
 def plumb_open_func(msg, arguments, match_group):
@@ -204,6 +211,10 @@ action_rules = {
 def handle_rules(msg, rules):
     log.info('Matching message against rules.')
 
+    cache = {
+            'type' : {},
+    }
+
     for rule in rules:
         rule_name, rule_lines = rule
 
@@ -217,7 +228,7 @@ def handle_rules(msg, rules):
             arguments = line[2:]
 
             f = match_rules[obj + ' ' + verb]
-            res, msg, match_group = f(msg, arguments, match_group)
+            res, msg, match_group, cache = f(msg, arguments, match_group, cache)
 
             if not res:
                 rule_matched = False
