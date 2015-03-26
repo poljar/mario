@@ -20,6 +20,8 @@ from functools import reduce
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlparse
 
+from parser import make_parser, parse_rule_file
+
 class Kind(Enum):
     raw = 1
     url = 2
@@ -44,99 +46,117 @@ def get_var_references(s):
     return (t for t in tokens if t[0] == '{' and t[-1] == '}')
 
 
-def kind_is_func(msg, arguments, match_group):
+def kind_is_func(msg, arguments, match_group, cache):
     try:
-        return msg['kind'] == Kind[arguments], msg, match_group
+        return msg['kind'] == Kind[arguments[0]], msg, match_group, cache
     except KeyError:
-        return False, msg, match_group
+        return False, msg, match_group, cache
 
 
-def arg_is_func(msg, arguments, match_group):
-    arg, checks = arguments.split(maxsplit=1)
+def arg_is_func(msg, arguments, match_group, cache):
+    arg, checks = arguments
 
-    ret = arg.format(*match_group, **msg) in checks.split('\n')
-    return ret, msg, match_group
-
-
-def data_is_func(msg, arguments, match_group):
-    return arg_is_func(mgs, '{data} ' + arguments, match_group)
+    ret = arg.format(*match_group, **msg) in checks
+    return ret, msg, match_group, cache
 
 
-def arg_matches_func(msg, arguments, match_group):
-    arg, patterns = arguments.split(maxsplit=1)
+def arg_matches_func(msg, arguments, match_group, cache):
+    arg, patterns = arguments
     arg = arg.format(*match_group, **msg)
 
-    for pattern in patterns.split('\n'):
+    for pattern in patterns:
         m = re.search(pattern, arg)
 
         if m:
-            return True, msg, match_group + m.groups()
+            return True, msg, match_group + m.groups(), cache
     else:
-        return False, msg, match_group
+        return False, msg, match_group, cache
 
 
-def data_match_func(msg, arguments, match_group):
-    return arg_matches_func(msg, '{data} ' + arguments, match_group)
-
-
-def arg_rewrite_func(msg, arguments, match_group):
-    arg, patterns = arguments.split(maxsplit=1)
+def arg_rewrite_func(msg, arguments, match_group, cache):
+    arg, patterns = arguments
     tmp = arg.format(*match_group, **msg)
     arg = arg.strip('{}')
 
     f = lambda acc, pattern: acc.replace(*pattern.split(',', 2))
-    tmp = reduce(f, patterns.split('\n'), tmp)
+    tmp = reduce(f, patterns, tmp)
 
     msg[arg] = tmp
 
-    return True, msg, match_group
+    return True, msg, match_group, cache
 
 
-def data_rewrite_func(msg, arguments, match_group):
-    return arg_rewrite_func(msg, '{data} ' + arguments, match_group)
+def mime_from_buffer(buf):
+    try:
+        # magic returns the mimetype as bytes, hence the decode
+        t = magic.from_buffer(buf, mime=True).decode('utf-8')
+    except AttributeError:
+        try:
+            m = magic.open(magic.MIME)
+            m.load()
+            t, _ = m.buffer(buf.encode('utf-8')).split(';')
+        except AttributeError as e:
+            log.error('Your \'magic\' module is unsupported. ' + \
+                    'Install either https://github.com/ahupp/python-magic ' + \
+                    'or https://github.com/file/file/tree/master/python ' + \
+                    '(official \'file\' python bindings, available as the ' + \
+                    'python-magic package on many distros)')
+
+            raise SystemExit
+
+    return t
 
 
-def detect_mimetype(msg):
-    if msg['kind'] == Kind.url:
-        t, _ = mimetypes.guess_type(msg['data'])
+def detect_mimetype(kind, var):
+    if kind == Kind.url:
+        t, _ = mimetypes.guess_type(var)
 
         if not t:
             log.debug('Failed mimetype guessing... Trying Content-Type header.')
-            t, _ = lookup_content_type(msg['data'])
+            t, _ = lookup_content_type(var)
+
             if t:
                 log.debug('Content-Type: {}'.format(t))
             else:
                 log.debug('Failed fetching Content-Type.')
-    elif msg['kind'] == Kind.raw:
-        # magic returns the mimetype as bytes, hence the decode
-        t = magic.from_buffer(msg['data'], mime=True).decode('utf-8')
+
+    elif kind == Kind.raw:
+        t = mime_from_buffer(var)
     else:
         t = None
 
     return t
 
 
-def data_istype_func(msg, arguments, match_group):
-    log.debug("Executing clause 'data istype {}'".format(arguments))
+def arg_istype_func(msg, arguments, match_group, cache):
+    arg, patterns = arguments
+    arg = arg.format(*match_group, **msg)
 
-    if msg.get('type'):
-        t = msg['type']
+    type_cache = cache['type']
+
+    if arg in type_cache.keys():
+        t = type_cache[arg]
     else:
-        t = detect_mimetype(msg)
+        t = detect_mimetype(msg['kind'], arg)
 
     if t:
-        m = re.match(arguments, t)
-        msg['type'] = t
+        type_cache[arg] = t
+
+        for pattern in patterns:
+            m = re.search(pattern, t)
+
+            if m:
+                break
     else:
-        log.info("\tCouldn't determine mimetype.")
-        return False, msg, match_group
+        log.info("Couldn't determine mimetype.")
+        return False, msg, match_group, cache
 
     if m:
         log.debug('\tType matches: {}'.format(m.group()))
-        return bool(m), msg, match_group
+        return bool(m), msg, match_group, cache
     else:
-        log.debug("\tType {} doesn't match expression {}.".format(t, arguments))
-        return False, msg, match_group
+        log.debug('\tType doesn\'t match or cannot guess type.')
+        return False, msg, match_group, cache
 
 
 def plumb_open_func(msg, arguments, match_group):
@@ -162,19 +182,17 @@ def plumb_open_func(msg, arguments, match_group):
 
 
 def plumb_download_func(msg, arguments, match_group):
-    if msg['kind'] != Kind.url:
-        return False, msg, match_group
-
     user_agent = 'Mozilla/5.0 (Windows NT 6.3; rv:36.0) Gecko/20100101 Firefox/36.0'
-
     opener = urllib.request.build_opener()
     opener.addheaders = [('User-agent', user_agent)]
 
     tmp_dir = tempfile.gettempdir()
 
+    target = arguments.format(*match_group, **msg)
+
     try:
         with tempfile.NamedTemporaryFile(prefix='plumber-', dir=tmp_dir, delete=False) as f:
-            f.write(opener.open(msg['data']).read())
+            f.write(opener.open(target).read())
             msg['filename'] = f.name
             return True, msg, match_group
     except OSError as e:
@@ -185,12 +203,9 @@ def plumb_download_func(msg, arguments, match_group):
 match_rules = {
         'kind is'      : kind_is_func,
         'arg is'       : arg_is_func,
-        'data is'      : data_is_func,
-        'data istype'  : data_istype_func,
+        'arg istype'   : arg_istype_func,
         'arg matches'  : arg_matches_func,
-        'data matches' : data_match_func,
         'arg rewrite'  : arg_rewrite_func,
-        'data rewrite' : data_rewrite_func,
 }
 
 action_rules = {
@@ -199,21 +214,27 @@ action_rules = {
 }
 
 
-def handle_rules(msg, config):
+def handle_rules(msg, rules):
     log.info('Matching message against rules.')
 
-    for rule in config.sections():
-        log.debug('Matching against rule [%s]', rule)
+    cache = {
+            'type' : {},
+    }
+
+    for rule in rules:
+        rule_name, rule_lines = rule
+
+        match_lines, action_lines = rule_lines
+        log.debug('Matching against rule [%s]', rule_name)
 
         match_group = ()
-        options = config.options(rule)
 
-        match_options  = (opt for opt in options if opt in match_rules)
-        action_options = (opt for opt in options if opt in action_rules)
+        for line in match_lines:
+            obj, verb = line[0:2]
+            arguments = line[2:]
 
-        for opt in match_options:
-            f = match_rules[opt]
-            res, msg, match_group = f(msg, config.get(rule, opt), match_group)
+            f = match_rules[obj + ' ' + verb]
+            res, msg, match_group, cache = f(msg, arguments, match_group, cache)
 
             if not res:
                 rule_matched = False
@@ -222,12 +243,12 @@ def handle_rules(msg, config):
             rule_matched = True
 
         if rule_matched:
-            log.info('Rule [%s] matched.', rule)
-            for opt in action_options:
-                action = config.get(rule, opt)
+            log.info('Rule [%s] matched.', rule_name)
+            for line in action_lines:
+                obj, verb, action = line
                 log.info('\tExecuting action "%s = %s" for rule [%s].',
-                         opt, action, rule)
-                f = action_rules[opt]
+                         obj + ' ' + verb, action, rule_name)
+                f = action_rules[obj + ' ' + verb]
                 res, msg, match_group = f(msg, action, match_group)
                 if not res:
                     break
@@ -281,7 +302,7 @@ def setup_logger(verbosity):
 
 
 def parse_rules(args, config):
-    parser = configparser.ConfigParser()
+    parser = make_parser()
 
     rule_file = None
 
@@ -296,11 +317,11 @@ def parse_rules(args, config):
             return -1
 
     log.info('Using rule file {}'.format(rule_file.name))
-    parser.read_file(rule_file)
+    rules = parse_rule_file(parser, rule_file)
     rule_file.close()
     log.info('Rules parsed.')
 
-    return parser
+    return rules
 
 
 def parse_config(args):
