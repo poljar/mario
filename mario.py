@@ -205,7 +205,7 @@ def handle_rules(msg, rules):
             arguments = line[2:]
 
             f = match_rules[obj + ' ' + verb]
-            res, msg, match_group = f(msg, line[2:], match_group)
+            res, msg, match_group = f(msg, arguments, match_group)
 
             if not res:
                 rule_matched = False
