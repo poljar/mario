@@ -10,24 +10,24 @@ mario(1) -- a plumber
 `mario` is a powerful plumber.
 
 ## OPTIONS
-* `-h`, `--help`:
-    Display the help message and quit.
-
-* `-v`, `--verbose`:
-    Increase the configured verbosity level  by  one. Specify multiple times to
-    increase log level multiple times.
+* `--config` `FILE`:
+    Configuration file to use.
 
 * `--guess`:
     Guess the kind of the message.
 
-* `--config` `FILE`:
-    Configuration file to use.
+* `-h`, `--help`:
+    Display the help message and quit.
+
+* `--print-mimetype`:
+    Detect and print the mimetype of the message data, then exit.
 
 * `--rule` *FILE*:
     Rules file to use.
 
-* `--print-mimetype`:
-    Detect and print the mimetype of the message data, then exit.
+* `-v`, `--verbose`:
+    Increase the configured verbosity level  by  one. Specify multiple times to
+    increase log level multiple times.
 
 ## ENVIRONMENT
 
