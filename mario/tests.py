@@ -8,15 +8,15 @@ arg matches {data} regex_string
 plumb open firefox'''
 
 simple_res = [
-                ['test', (
-                    [
-                        ['arg', 'matches', '{data}', ['regex_string']]
-                    ],
-                    [
-                        ['plumb', 'open', 'firefox']]
-                    )
-                ]
-            ]
+    ['test', (
+        [
+            ['arg', 'matches', '{data}', ['regex_string']]
+        ],
+        [
+            ['plumb', 'open', 'firefox']
+        ]
+    )]
+]
 
 
 multiple_margs_rule = '''[test]
@@ -25,14 +25,15 @@ arg matches {data} regex_string
 plumb open firefox'''
 
 multiple_margs_res = [
-                ['test', (
-                    [
-                        ['arg', 'matches', '{data}', ['regex_string', 'regex_inbetween']]], \
-                    [
-                        ['plumb', 'open', 'firefox']]
-                    )
-                ]
-            ]
+    ['test', (
+        [
+            ['arg', 'matches', '{data}', ['regex_string', 'regex_inbetween']]
+        ],
+        [
+            ['plumb', 'open', 'firefox']
+        ]
+    )]
+]
 
 
 multiple_rules = '''[test]
@@ -44,25 +45,23 @@ arg is {data} something
 plumb open echo {data}'''
 
 multiple_res = [
-                ['test', (
-                    [
-                        ['arg', 'matches', '{data}', ['regex_string', 'regex_inbetween']]
-                    ],
-                    [
-                        ['plumb', 'open', 'firefox']
-                    ]
-                    )
-                ], \
-                ['test2', (
-                    [
-                        ['arg', 'is', '{data}', ['something']]
-                    ],
-                    [
-                        ['plumb', 'open', 'echo {data}']
-                    ]
-                    )
-                ]
-            ]
+    ['test', (
+        [
+            ['arg', 'matches', '{data}', ['regex_string', 'regex_inbetween']]
+        ],
+        [
+            ['plumb', 'open', 'firefox']
+        ]
+    )],
+    ['test2', (
+        [
+            ['arg', 'is', '{data}', ['something']]
+        ],
+        [
+            ['plumb', 'open', 'echo {data}']
+        ]
+    )]
+]
 
 rule_with_comment = '''# this is a comment
 [test] # even here?
@@ -82,15 +81,15 @@ arg matches /bla/{data}/bla.py regex_string
 plumb open firefox'''
 
 complex_var_res = [
-                ['test', (
-                    [
-                        ['arg', 'matches', '/bla/{data}/bla.py', ['regex_string']]
-                    ],
-                    [
-                        ['plumb', 'open', 'firefox']]
-                    )
-                ]
-            ]
+    ['test', (
+        [
+            ['arg', 'matches', '/bla/{data}/bla.py', ['regex_string']]
+        ],
+        [
+            ['plumb', 'open', 'firefox']
+        ]
+    )]
+]
 
 
 rule_utf8_names = '''[čest]
@@ -98,15 +97,15 @@ arg matches /bla/{data}/ćla.py regex_stringić # comments ¹²³
 plumb open firefȭx'''
 
 res_utf8_names = [
-                ['čest', (
-                    [
-                        ['arg', 'matches', '/bla/{data}/ćla.py', ['regex_stringić']]
-                    ],
-                    [
-                        ['plumb', 'open', 'firefȭx']]
-                    )
-                ]
-            ]
+    ['čest', (
+        [
+            ['arg', 'matches', '/bla/{data}/ćla.py', ['regex_stringić']]
+        ],
+        [
+            ['plumb', 'open', 'firefȭx']
+        ]
+    )]
+]
 
 
 multiple_variables_rule = '''[test]
@@ -114,15 +113,15 @@ arg matches /bla/{data}/{another} regex_string
 plumb open firefox'''
 
 multiple_variables_res = [
-                ['test', (
-                    [
-                        ['arg', 'matches', '/bla/{data}/{another}', ['regex_string']]
-                    ],
-                    [
-                        ['plumb', 'open', 'firefox']]
-                    )
-                ]
-            ]
+    ['test', (
+        [
+            ['arg', 'matches', '/bla/{data}/{another}', ['regex_string']]
+        ],
+        [
+            ['plumb', 'open', 'firefox']
+        ]
+    )]
+]
 
 
 liberal_whitespace = '''[test] # co
