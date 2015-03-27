@@ -16,6 +16,7 @@ setup(name = 'mario',
       url = 'https://github.com/poljar/mario',
       description = ('A simple plumber'),
       packages = ['mario'],
+      test_suite = 'mario.tests',
       install_requires = [magic_module, 'pyxdg'],
       license = 'ISC',
       entry_points = {
