@@ -380,6 +380,12 @@ def main():
             args.kind = Kind.raw
         log.info('\tGuessed kind {}'.format(args.kind))
 
+    # probably a hack and possibly a reason why we can't really read in
+    # messages (or rather, the data part of the message) as a command-line
+    # parameter
+    if args.kind == Kind.raw and type(args.msg) != bytes:
+        args.msg = args.msg.encode('utf-8')
+
     if args.print_mimetype:
         print(detect_mimetype(args.kind, args.msg))
         sys.exit(0)
@@ -394,12 +400,6 @@ def main():
         url = urlparse(args.msg)
         msg['netloc'] = url.netloc
         msg['netpath'] = url.path
-
-    # probably a hack and possibly a reason why we can't really read in
-    # messages (or rather, the data part of the message) as a command-line
-    # parameter
-    if args.kind == Kind.raw and type(args.msg) != bytes:
-        args.msg = args.msg.encode('utf-8')
 
     rules = parse_rules(args, config)
 
