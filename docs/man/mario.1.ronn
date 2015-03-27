@@ -26,6 +26,9 @@ mario(1) -- a plumber
 * `--rule` *FILE*:
     Rules file to use.
 
+* `--print-mimetype`:
+    Detect and print the mimetype of the message data, then exit.
+
 ## ENVIRONMENT
 
 * `BROWSER`:

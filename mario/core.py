@@ -267,13 +267,17 @@ def parse_arguments():
     group.add_argument('kind', help='kind of message',
                        nargs='?',
                        choices=[k.name for k in Kind])
-    group.add_argument('--guess',  action='store_true',
+    group.add_argument('--guess', action='store_true',
                        help='guess the kind of the message')
 
     parser.add_argument('--config', type=argparse.FileType('r'),
                         help='config file to use')
     parser.add_argument('--rule', type=argparse.FileType('r'),
                         help='rule file to use')
+
+    parser.add_argument('--print-mimetype', action='store_true',
+                        help='detect and print the mimetype of the message data, '
+                        'then exit')
 
     args = parser.parse_args()
 
@@ -367,8 +371,6 @@ def main():
 
     setup_logger(args.verbose)
 
-    config = parse_config(args)
-
     if args.guess:
         log.info('Using heuristics to guess kind...')
         url = urlparse(args.msg)
@@ -377,6 +379,12 @@ def main():
         else:
             args.kind = Kind.raw
         log.info('\tGuessed kind {}'.format(args.kind))
+
+    if args.print_mimetype:
+        print(detect_mimetype(args.kind, args.msg))
+        sys.exit(0)
+
+    config = parse_config(args)
 
     msg = {'data' : args.msg,
            'kind' : args.kind
