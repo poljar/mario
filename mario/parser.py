@@ -20,12 +20,12 @@ def make_parser():
 
     alphas_extra = ''.join(chr(x) for x in range(0x100, 0x350))
 
-    # NOTE: this are not all 'printable' Unicode characters if needed expand the
-    # alphas_extra variable.
+    # NOTE: this are not all 'printable' Unicode characters if needed expand
+    # the alphas_extra variable.
     utf8_printables = printables + alphas8bit + alphas_extra
 
     ArgTxt   = Word(utf8_printables)('arg')
-# TODO allow the excluded chars if they are escaped.
+    # TODO: allow the excluded chars if they are escaped.
     NameTxt  = Word(utf8_printables, excludeChars='{ } [ ]')
 
     Variable = Word(utf8_printables)
@@ -118,6 +118,7 @@ def print_parse_error(e):
     error_indicator = '\t' + ' ' * e.col + '^'
 
     print(error_indicator)
+
 
 def parse_rule_file(parser, rule_file):
     try:
