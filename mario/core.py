@@ -27,7 +27,9 @@ class Kind(Enum):
     url = 2
 
 def lookup_content_type(url):
-    request = urllib.request.Request(url=url, method='HEAD')
+    user_agent = 'Mozilla/5.0 (Windows NT 6.3; rv:36.0) Gecko/20100101 Firefox/36.0'
+    request = urllib.request.Request(url=url, method='HEAD',
+                                     headers={'User-agent' : user_agent})
 
     try:
         request = urllib.request.urlopen(request)
