@@ -10,21 +10,21 @@ mario(1) -- a plumber
 `mario` is a powerful plumber.
 
 ## OPTIONS
-* `--config` `FILE`:
-    Configuration file to use.
-
-* `--guess`:
-    Guess the kind of the message.
-
 * `-h`, `--help`:
     Display the help message and quit.
-
-* `--rule` *FILE*:
-    Rules file to use.
 
 * `-v`, `--verbose`:
     Increase the configured verbosity level  by  one. Specify multiple times to
     increase log level multiple times.
+
+* `--guess`:
+    Guess the kind of the message.
+
+* `--config` `FILE`:
+    Configuration file to use.
+
+* `--rule` *FILE*:
+    Rules file to use.
 
 ## ENVIRONMENT
 
