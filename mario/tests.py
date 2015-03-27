@@ -1,7 +1,9 @@
 import unittest
 
+from mario.core import arg_rewrite_func, Kind
 from mario.parser import make_parser, parse_rule_string
 
+# PARSER TESTS
 
 simple_rule = '''[test]
 arg matches {data} regex_string
@@ -179,6 +181,19 @@ class ParserTest(unittest.TestCase):
 
     def test_data_multiple_marg(self):
         self.parser_test_helper(data_multiple_margs_rule, multiple_margs_res)
+
+# CORE TESTS
+
+class CoreTest(unittest.TestCase):
+    def test_arg_rewrite_simple(self):
+        self.assertEqual(
+            arg_rewrite_func({'data' : 'oolong',
+                              'kind' : Kind['raw']
+                             },
+                             ['{data}', ['oo,', 'g,g jing']],
+                             (), {}),
+            (True, {'data': 'long jing', 'kind': Kind['raw']}, (), {})
+        )
 
 if __name__ == '__main__':
         unittest.main()
