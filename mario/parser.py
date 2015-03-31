@@ -32,31 +32,30 @@ def make_parser():
 
     KindObjects = Keyword('kind')
     KindVerbs   = Keyword('is')
-    KindArgs    = Keyword('url')  | \
-                  Keyword('raw')
+    KindArgs    = Keyword('url') | Keyword('raw')
 
-    KindMatchRule = Group(KindObjects('object') + WS + \
-                          KindVerbs('verb')     + WS + \
+    KindMatchRule = Group(KindObjects('object') + WS +
+                          KindVerbs('verb')     + WS +
                           KindArgs('args'))
 
     MatchArg = Group(ArgTxt + ZeroOrMore(EOL + WS + ArgTxt))
     MatchArg = MatchArg('arg')
 
     MatchObjects = Keyword('arg')
-    MatchVerbs   = Keyword('is')      | \
-                   Keyword('istype')  | \
-                   Keyword('matches') | \
-                   Keyword('rewrite')
+    MatchVerbs   = (Keyword('is')      |
+                    Keyword('istype')  |
+                    Keyword('matches') |
+                    Keyword('rewrite'))
     MatchVerbs   = MatchVerbs('verb')
 
-    ArgMatchRule = Group(Keyword('arg')('object') + WS + \
-                         MatchVerbs               + WS + \
-                         Variable('var')          + WS + \
+    ArgMatchRule = Group(Keyword('arg')('object') + WS +
+                         MatchVerbs               + WS +
+                         Variable('var')          + WS +
                          MatchArg)
     ArgMatchRule = ArgMatchRule('match-rule')
 
-    DataMatchRule = Group(Keyword('data')('object') + WS + \
-                          MatchVerbs                + WS + \
+    DataMatchRule = Group(Keyword('data')('object') + WS +
+                          MatchVerbs                + WS +
                           MatchArg)
     DataMatchRule = DataMatchRule('match-rule')
 
@@ -69,19 +68,18 @@ def make_parser():
 
     MatchRule = ArgMatchRule | DataMatchRule
 
-    MatchLines = Group(Optional(KindMatchRule('kind-rule') + EOL) + \
-                       MatchRule + ZeroOrMore(EOL + MatchRule)) | \
-                 Group(KindMatchRule('kind-rule'))
+    MatchLines = (Group(Optional(KindMatchRule('kind-rule') + EOL) +
+                        MatchRule + ZeroOrMore(EOL + MatchRule))   |
+                  Group(KindMatchRule('kind-rule')))
 
     ActionObject = Keyword('plumb')
-    ActionVerb   = Keyword('run')     | \
-                   Keyword('download')
+    ActionVerb   = Keyword('run') | Keyword('download')
 
-    ActionArg = Combine(Word(utf8_printables) + \
+    ActionArg = Combine(Word(utf8_printables) +
                 ZeroOrMore(OneOrMore(' ') + NotAny('#') + Word(utf8_printables)))
 
-    ActionRule = Group(ActionObject('object') + WS + \
-                       ActionVerb('verb')     + WS + \
+    ActionRule = Group(ActionObject('object') + WS +
+                       ActionVerb('verb')     + WS +
                        ActionArg('arg'))
 
     ActionRule = ActionRule('act-rule')
@@ -90,12 +88,12 @@ def make_parser():
 
     RuleName = Suppress('[') + NameTxt + Suppress(']') + EOL
 
-    Rule = Group(RuleName('name') + \
-                 MatchLines('match-lines') + EOL + \
+    Rule = Group(RuleName('name') +
+                 MatchLines('match-lines') + EOL +
                  ActionLines('act-lines'))
 
-    RuleFile = Rule('rule') + ZeroOrMore(EOL + Rule('rule')) + \
-               ZeroOrMore(EOL) + StringEnd()
+    RuleFile = (Rule('rule') + ZeroOrMore(EOL + Rule('rule')) +
+                ZeroOrMore(EOL) + StringEnd())
     RuleFile = RuleFile('rules')
 
     RuleFile.ignore(Comment)
