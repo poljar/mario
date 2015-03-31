@@ -74,7 +74,7 @@ def make_parser():
                  Group(KindMatchRule('kind-rule'))
 
     ActionObject = Keyword('plumb')
-    ActionVerb   = Keyword('open')     | \
+    ActionVerb   = Keyword('run')     | \
                    Keyword('download')
 
     ActionArg = Combine(Word(utf8_printables) + \

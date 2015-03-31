@@ -11,7 +11,7 @@ from mario.parser import make_parser, parse_rule_string
 
 simple_rule = '''[test]
 arg matches {data} regex_string
-plumb open firefox'''
+plumb run firefox'''
 
 simple_res = [
     ['test', (
@@ -19,7 +19,7 @@ simple_res = [
             ['arg', 'matches', '{data}', ['regex_string']]
         ],
         [
-            ['plumb', 'open', 'firefox']
+            ['plumb', 'run', 'firefox']
         ]
     )]
 ]
@@ -28,7 +28,7 @@ simple_res = [
 multiple_margs_rule = '''[test]
 arg matches {data} regex_string
                    regex_inbetween
-plumb open firefox'''
+plumb run firefox'''
 
 multiple_margs_res = [
     ['test', (
@@ -36,7 +36,7 @@ multiple_margs_res = [
             ['arg', 'matches', '{data}', ['regex_string', 'regex_inbetween']]
         ],
         [
-            ['plumb', 'open', 'firefox']
+            ['plumb', 'run', 'firefox']
         ]
     )]
 ]
@@ -45,10 +45,10 @@ multiple_margs_res = [
 multiple_rules = '''[test]
 arg matches {data} regex_string
                    regex_inbetween
-plumb open firefox
+plumb run firefox
 [test2]
 arg is {data} something
-plumb open echo {data}'''
+plumb run echo {data}'''
 
 multiple_res = [
     ['test', (
@@ -56,7 +56,7 @@ multiple_res = [
             ['arg', 'matches', '{data}', ['regex_string', 'regex_inbetween']]
         ],
         [
-            ['plumb', 'open', 'firefox']
+            ['plumb', 'run', 'firefox']
         ]
     )],
     ['test2', (
@@ -64,7 +64,7 @@ multiple_res = [
             ['arg', 'is', '{data}', ['something']]
         ],
         [
-            ['plumb', 'open', 'echo {data}']
+            ['plumb', 'run', 'echo {data}']
         ]
     )]
 ]
@@ -77,14 +77,14 @@ arg matches {data} regex_string # commenting is fun
 
    # maybe here with some whitespace?
 
-plumb open firefox # inline commenting wherever I want
+plumb run firefox # inline commenting wherever I want
 
 #even here ?'''
 
 
 rule_complex_variable = '''[test]
 arg matches /bla/{data}/bla.py regex_string
-plumb open firefox'''
+plumb run firefox'''
 
 complex_var_res = [
     ['test', (
@@ -92,7 +92,7 @@ complex_var_res = [
             ['arg', 'matches', '/bla/{data}/bla.py', ['regex_string']]
         ],
         [
-            ['plumb', 'open', 'firefox']
+            ['plumb', 'run', 'firefox']
         ]
     )]
 ]
@@ -100,7 +100,7 @@ complex_var_res = [
 
 rule_utf8_names = '''[čest]
 arg matches /bla/{data}/ćla.py regex_stringić # comments ¹²³
-plumb open firefȭx'''
+plumb run firefȭx'''
 
 res_utf8_names = [
     ['čest', (
@@ -108,7 +108,7 @@ res_utf8_names = [
             ['arg', 'matches', '/bla/{data}/ćla.py', ['regex_stringić']]
         ],
         [
-            ['plumb', 'open', 'firefȭx']
+            ['plumb', 'run', 'firefȭx']
         ]
     )]
 ]
@@ -116,7 +116,7 @@ res_utf8_names = [
 
 multiple_variables_rule = '''[test]
 arg matches /bla/{data}/{another} regex_string
-plumb open firefox'''
+plumb run firefox'''
 
 multiple_variables_res = [
     ['test', (
@@ -124,7 +124,7 @@ multiple_variables_res = [
             ['arg', 'matches', '/bla/{data}/{another}', ['regex_string']]
         ],
         [
-            ['plumb', 'open', 'firefox']
+            ['plumb', 'run', 'firefox']
         ]
     )]
 ]
@@ -132,18 +132,18 @@ multiple_variables_res = [
 
 liberal_whitespace = '''[test] # co
 arg     matches         {data}         regex_string      #   white      space    
-plumb     open        firefox'''
+plumb     run        firefox'''
 
 
 data_object_rule = '''[test]
 data matches regex_string
-plumb open firefox'''
+plumb run firefox'''
 
 
 data_multiple_margs_rule = '''[test]
 data matches regex_string
              regex_inbetween
-plumb open firefox'''
+plumb run firefox'''
 
 
 class ParserTest(unittest.TestCase):

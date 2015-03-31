@@ -161,7 +161,7 @@ def arg_istype_func(msg, arguments, match_group, cache):
         return False, msg, match_group, cache
 
 
-def plumb_open_func(msg, arguments, match_group):
+def plumb_run_func(msg, arguments, match_group):
     tmp = arguments.format(*match_group, **msg)
 
     vs = get_var_references(arguments)
@@ -211,7 +211,7 @@ match_rules = {
 }
 
 action_rules = {
-        'plumb open'     : plumb_open_func,
+        'plumb run'      : plumb_run_func,
         'plumb download' : plumb_download_func,
 }
 
