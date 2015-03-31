@@ -6,6 +6,7 @@ import unittest
 
 from mario.core import arg_rewrite_func, Kind
 from mario.parser import make_parser, parse_rule_string
+from mario.util import ElasticDict
 
 # PARSER TESTS
 
@@ -185,6 +186,43 @@ class ParserTest(unittest.TestCase):
 
     def test_data_multiple_marg(self):
         self.parser_test_helper(data_multiple_margs_rule, multiple_margs_res)
+
+# UTIL TESTS
+
+class TestElasticDict(unittest.TestCase):
+    def test_empty_is_zero_length(self):
+        d = ElasticDict()
+        self.assertEqual(len(d), 0)
+
+    def test_empty_is_empty_after_reverse(self):
+        d = ElasticDict()
+        d['spam'] = 'eggs'
+        d.reverse()
+        self.assertDictEqual(dict(d), {})
+
+    def test_reverse_deletes_added_items(self):
+        d = ElasticDict()
+        d['spam'] = 'bacon'
+        d.reverse()
+        self.assertNotIn('spam', d)
+
+    def test_reverse_resets_changes(self):
+        d = ElasticDict({'spam' : 'eggs'})
+        d['spam'] = 'bacon'
+        d.reverse()
+        self.assertEqual(d['spam'], 'eggs')
+
+    def test_nonexistent_raises_keyerror(self):
+        d = ElasticDict()
+        with self.assertRaises(KeyError):
+            d['bar']
+
+    def test_strain(self):
+        d = ElasticDict({'tea' : 'oolong'})
+        d['tea'] = 'green'
+        d['grenade']  = 'antioch'
+        self.assertDictEqual(d.strain, {'grenade' : 'antioch',
+                                        'tea' : 'green'})
 
 # CORE TESTS
 
