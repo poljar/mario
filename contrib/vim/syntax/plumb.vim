@@ -13,7 +13,7 @@ syn keyword marioMatchObjects kind data arg nextgroup=marioMatchVerbs
 syn keyword marioKinds raw url
 syn keyword marioMatchVerbs is istype matches rewrite
 syn keyword marioActionObjects plumb nextgroup=marioActionVerbs
-syn keyword marioActionVerbs download open
+syn keyword marioActionVerbs download run
 syn region marioVariable start="{" end="}"
 
 syn match marioComment "#.*$"
