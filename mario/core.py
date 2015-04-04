@@ -202,7 +202,7 @@ def plumb_download_func(msg, arguments, match_group):
         return False, msg, match_group
 
 
-match_rules = {
+match_clauses = {
         'kind is'      : kind_is_func,
         'arg is'       : arg_is_func,
         'arg istype'   : arg_istype_func,
@@ -210,7 +210,7 @@ match_rules = {
         'arg rewrite'  : arg_rewrite_func,
 }
 
-action_rules = {
+action_clauses = {
         'plumb run'      : plumb_run_func,
         'plumb download' : plumb_download_func,
 }
@@ -235,7 +235,7 @@ def handle_rules(msg, rules):
             obj, verb = line[0:2]
             arguments = line[2:]
 
-            f = match_rules[obj + ' ' + verb]
+            f = match_clauses[obj + ' ' + verb]
             res, msg, match_group, cache = f(msg, arguments, match_group, cache)
 
             if not res:
@@ -250,7 +250,7 @@ def handle_rules(msg, rules):
                 obj, verb, action = line
                 log.info('\tExecuting action "%s = %s" for rule [%s].',
                          obj + ' ' + verb, action, rule_name)
-                f = action_rules[obj + ' ' + verb]
+                f = action_clauses[obj + ' ' + verb]
                 res, msg, match_group = f(msg, action, match_group)
                 if not res:
                     break
