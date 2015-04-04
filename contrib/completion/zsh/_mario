@@ -8,6 +8,7 @@ _mario() {
         '--config[config file to use]:config:_files' \
         '--rule[rule file to use]:rules:_files -g \*.plumb' \
         '2:kinds:(raw url)' \
+        '--print-mimetype[detect and print the mimetype of the message data, then exit]' \
 }
 
 _mario "$@"
