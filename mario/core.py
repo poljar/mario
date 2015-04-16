@@ -43,9 +43,17 @@ def lookup_content_type(url):
 
     return response, None
 
+
 def get_var_references(s):
-    tokens = s.split()
-    return (t for t in tokens if t[0] == '{' and t[-1] == '}')
+    start = 0
+    while True:
+        p1 = s.find("{", start)
+        p2 = s.find("}", p1+1)
+        if p1 != -1 and p2 != -1:
+            start = p2+1
+            yield s[p1:p2+1]
+        else:
+            raise StopIteration
 
 
 def kind_is_func(msg, arguments, match_group, cache):
