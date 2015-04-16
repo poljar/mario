@@ -199,5 +199,24 @@ class CoreTest(unittest.TestCase):
             (True, {'data': 'long jing', 'kind': Kind['raw']}, (), {})
         )
 
+    def test_get_var_references_basic(self):
+        self.assertListEqual(
+            list(get_var_references('{0}')),
+            ['{0}']
+        )
+
+    def test_get_var_references_basic_spaces(self):
+        self.assertListEqual(
+            list(get_var_references('   {0} \t  ')),
+            ['{0}']
+        )
+
+    def test_get_var_references_multiple_vars(self):
+        self.assertListEqual(
+            list(get_var_references("{0}www{1}foo {abc}")),
+            ['{0}', '{1}', '{abc}']
+        )
+
+
 if __name__ == '__main__':
         unittest.main()
