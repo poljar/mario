@@ -183,11 +183,17 @@ def plumb_run_func(msg, arguments, match_group):
         except ValueError:
             log.info('\t\t{var} = {value}'.format(var=v, value=msg[var_name]))
 
-    ret = subprocess.call(tmp.split())
-    if ret == 0:
-        return True, msg, match_group
-    else:
-        log.info('\t\tTarget program exited with non-zero exit code ({})'.format(ret))
+    try:
+        ret = subprocess.call(tmp.split())
+        if ret == 0:
+            return True, msg, match_group
+        else:
+            log.info('\t\tTarget program exited with non-zero exit code'
+                     ' ({})'.format(ret))
+            return False, msg, match_group
+    except FileNotFoundError as e:
+        log.info("\t\tRule failed because there is no program named '{}' on the"
+                 " PATH.".format(e.strerror.split("'")[1]))
         return False, msg, match_group
 
 
