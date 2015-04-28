@@ -13,7 +13,6 @@ import mimetypes
 import subprocess
 import configparser
 import logging as log
-import urllib.request
 import magic
 from xdg import BaseDirectory
 from enum import Enum
@@ -197,17 +196,22 @@ def plumb_run_func(msg, arguments, match_group):
 
 
 def plumb_download_func(msg, arguments, match_group):
-    user_agent = 'Mozilla/5.0 (Windows NT 6.3; rv:36.0) Gecko/20100101 Firefox/36.0'
-    opener = urllib.request.build_opener()
-    opener.addheaders = [('User-agent', user_agent)]
+    headers = {'User-agent' : 'Mozilla/5.0 (Windows NT 6.3; rv:36.0)' +
+               'Gecko/20100101 Firefox/36.0'}
 
     tmp_dir = tempfile.gettempdir()
 
-    target = arguments.format(*match_group, **msg)
+    url = arguments.format(*match_group, **msg)
+
+    request = requests.get(url, headers=headers, stream=True)
 
     try:
         with tempfile.NamedTemporaryFile(prefix='plumber-', dir=tmp_dir, delete=False) as f:
-            f.write(opener.open(target).read())
+            for chunk in request.iter_content(chunk_size=1024):
+                if chunk: # filter out keep-alive new chunks
+                    f.write(chunk)
+                    f.flush()
+
             msg['filename'] = f.name
             return True, msg, match_group
     except OSError as e:
