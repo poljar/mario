@@ -6,6 +6,7 @@
 import os
 import re
 import sys
+import requests
 import argparse
 import tempfile
 import mimetypes
@@ -17,7 +18,6 @@ import magic
 from xdg import BaseDirectory
 from enum import Enum
 from functools import reduce
-from urllib.error import HTTPError, URLError
 from urllib.parse import urlparse
 
 from mario.parser import make_parser, parse_rule_file
@@ -27,14 +27,13 @@ class Kind(Enum):
     url = 2
 
 def lookup_content_type(url):
-    user_agent = 'Mozilla/5.0 (Windows NT 6.3; rv:36.0) Gecko/20100101 Firefox/36.0'
-    request = urllib.request.Request(url=url, method='HEAD',
-                                     headers={'User-agent' : user_agent})
+    headers = {'User-agent' : 'Mozilla/5.0 (Windows NT 6.3; rv:36.0)' +
+               'Gecko/20100101 Firefox/36.0'}
 
     try:
-        request = urllib.request.urlopen(request)
-        response = request.getheader('Content-Type')
-    except (HTTPError, URLError):
+        request = requests.head(url, headers=headers)
+        response = request.headers['content-type']
+    except (requests.RequestException):
         return None, None
 
     if ';' in response:
