@@ -4,7 +4,7 @@
 
 import unittest
 
-from mario.core import arg_rewrite_func, Kind
+from mario.core import get_var_references, arg_rewrite_func, Kind
 from mario.parser import make_parser, parse_rule_string
 
 # PARSER TESTS
