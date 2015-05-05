@@ -32,7 +32,7 @@ def lookup_content_type(url):
     try:
         request = requests.head(url, headers=headers)
         response = request.headers['content-type']
-    except (requests.RequestException):
+    except (requests.RequestException, KeyError):
         return None, None
 
     if ';' in response:
