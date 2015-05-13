@@ -26,7 +26,7 @@ class Kind(Enum):
     url = 2
 
 def lookup_content_type(url):
-    headers = {'User-agent' : 'Mozilla/5.0 (Windows NT 6.3; rv:36.0)' +
+    headers = {'User-agent' : 'Mozilla/5.0 (Windows NT 6.3; rv:36.0) '
                'Gecko/20100101 Firefox/36.0'}
 
     try:
@@ -196,7 +196,7 @@ def plumb_run_func(msg, arguments, match_group):
 
 
 def plumb_download_func(msg, arguments, match_group):
-    headers = {'User-agent' : 'Mozilla/5.0 (Windows NT 6.3; rv:36.0)' +
+    headers = {'User-agent' : 'Mozilla/5.0 (Windows NT 6.3; rv:36.0) '
                'Gecko/20100101 Firefox/36.0'}
 
     tmp_dir = tempfile.gettempdir()
