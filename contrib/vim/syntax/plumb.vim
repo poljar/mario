@@ -28,5 +28,8 @@ hi def link marioMatchVerbs    Function
 hi def link marioActionObjects Keyword
 hi def link marioActionVerbs   Function
 
+set commentstring=#%s
+set comments=b:#
+
 let b:current_syntax = "plumb"
 
