@@ -386,6 +386,9 @@ def parse_config(args):
 
 
 def main():
+    # suppress most log messages from requests
+    log.getLogger("requests").setLevel(log.WARNING)
+
     args = parse_arguments()
 
     setup_logger(args.verbose)
