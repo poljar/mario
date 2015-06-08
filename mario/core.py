@@ -167,19 +167,24 @@ def arg_istype_func(msg, arguments, match_group, cache):
         return False, msg, match_group, cache
 
 
-def plumb_run_func(msg, arguments, match_group):
-    tmp = arguments.format(*match_group, **msg)
-
-    vs = get_var_references(arguments)
+def log_var_references(msg, action):
+    vs = get_var_references(action)
     for v in vs:
         var_name = v.strip('{}')
-        try:
-            var_name = int(var_name)
-            log.info('\t\t{{{var}}} = {value}'.format(
-                var=var_name,
-                value=match_group[var_name]))
-        except ValueError:
-            log.info('\t\t{var} = {value}'.format(var=v, value=msg[var_name]))
+
+        log.info('\t\t{{{var}}} = {value}'.format(
+            var=var_name.lstrip('\\'),
+            value=msg[var_name]))
+
+
+def plumb_run_func(msg, arguments):
+    try:
+        log_var_references(msg, arguments)
+    except KeyError as e:
+        log.info('\t\tNo such variable: {{{var}}}'.format(var=e.args[0]))
+        return False, msg
+
+    tmp = arguments.format(**msg)
 
     try:
         ret = subprocess.call(tmp.split())
@@ -194,6 +199,12 @@ def plumb_run_func(msg, arguments, match_group):
                  " PATH.".format(e.strerror.split("'")[1]))
         return False, msg, match_group
 
+def plumb_download_func(msg, arguments):
+    try:
+        log_var_references(msg, arguments)
+    except KeyError as e:
+        log.info('\t\tNo such variable: {{{var}}}'.format(var=e.args[0]))
+        return False, msg
 
 def plumb_download_func(msg, arguments, match_group):
     headers = {'User-agent' : 'Mozilla/5.0 (Windows NT 6.3; rv:36.0) '
