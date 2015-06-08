@@ -4,7 +4,7 @@
 
 import unittest
 
-from mario.core import get_var_references, arg_rewrite_func, Kind
+from mario.core import get_var_references, arg_matches_func, arg_rewrite_func, Kind
 from mario.parser import make_parser, parse_rule_string
 from mario.util import ElasticDict
 
@@ -227,14 +227,24 @@ class TestElasticDict(unittest.TestCase):
 # CORE TESTS
 
 class CoreTest(unittest.TestCase):
+    def test_arg_matches_func_match_groups(self):
+        self.assertEqual(
+            arg_matches_func(
+              {'data' : 'foo1bar2'},
+              ("{data}", ["foo(.)bar(.)"]),
+              {}
+            ),
+            (True, {'data' : 'foo1bar2', '\\0' : '1', '\\1' : '2'}, {})
+        )
+
     def test_arg_rewrite_simple(self):
         self.assertEqual(
             arg_rewrite_func({'data' : 'oolong',
                               'kind' : Kind['raw']
                              },
                              ['{data}', ['oo,', 'g,g jing']],
-                             (), {}),
-            (True, {'data': 'long jing', 'kind': Kind['raw']}, (), {})
+                             {}),
+            (True, {'data': 'long jing', 'kind': Kind['raw']}, {})
         )
 
     def test_get_var_references_basic(self):

@@ -20,6 +20,7 @@ from functools import reduce
 from urllib.parse import urlparse
 
 from mario.parser import make_parser, parse_rule_file
+from mario.util import ElasticDict
 
 class Kind(Enum):
     raw = 1
@@ -42,6 +43,10 @@ def lookup_content_type(url):
     return response, None
 
 
+def escape_match_group_references(action):
+    return re.sub(r"{(\d*)}", r"{\\\1}", action)
+
+
 def get_var_references(s):
     start = 0
     while True:
@@ -54,36 +59,39 @@ def get_var_references(s):
             raise StopIteration
 
 
-def kind_is_func(msg, arguments, match_group, cache):
+def kind_is_func(msg, arguments, cache):
     try:
-        return msg['kind'] == Kind[arguments[0]], msg, match_group, cache
+        return msg['kind'] == Kind[arguments[0]], msg, cache
     except KeyError:
-        return False, msg, match_group, cache
+        return False, msg, cache
 
 
-def arg_is_func(msg, arguments, match_group, cache):
+def arg_is_func(msg, arguments, cache):
     arg, checks = arguments
 
-    ret = arg.format(*match_group, **msg) in checks
-    return ret, msg, match_group, cache
+    ret = arg.format(**msg) in checks
+    return ret, msg, cache
 
 
-def arg_matches_func(msg, arguments, match_group, cache):
+def arg_matches_func(msg, arguments, cache):
     arg, patterns = arguments
-    arg = arg.format(*match_group, **msg)
+    arg = arg.format(**msg)
 
     for pattern in patterns:
         m = re.search(pattern, arg)
 
         if m:
-            return True, msg, match_group + m.groups(), cache
+            matches = {"\\{}".format(i) : e
+                            for i, e in enumerate(m.groups())}
+            msg.update(matches)
+            return True, msg, cache
     else:
-        return False, msg, match_group, cache
+        return False, msg, cache
 
 
-def arg_rewrite_func(msg, arguments, match_group, cache):
+def arg_rewrite_func(msg, arguments, cache):
     arg, patterns = arguments
-    tmp = arg.format(*match_group, **msg)
+    tmp = arg.format(**msg)
     arg = arg.strip('{}')
 
     f = lambda acc, pattern: acc.replace(*pattern.split(',', 2))
@@ -91,7 +99,7 @@ def arg_rewrite_func(msg, arguments, match_group, cache):
 
     msg[arg] = tmp
 
-    return True, msg, match_group, cache
+    return True, msg, cache
 
 
 def mime_from_buffer(buf):
@@ -136,9 +144,9 @@ def detect_mimetype(kind, var):
     return t
 
 
-def arg_istype_func(msg, arguments, match_group, cache):
+def arg_istype_func(msg, arguments, cache):
     arg, patterns = arguments
-    arg = arg.format(*match_group, **msg)
+    arg = arg.format(**msg)
 
     type_cache = cache['type']
 
@@ -157,14 +165,17 @@ def arg_istype_func(msg, arguments, match_group, cache):
                 break
     else:
         log.info("Couldn't determine mimetype.")
-        return False, msg, match_group, cache
+        return False, msg, cache
 
     if m:
         log.debug('\tType matches: {}'.format(m.group()))
-        return bool(m), msg, match_group, cache
+        matches = {"\\{}".format(i) : e
+                        for i, e in enumerate(m.groups())}
+        msg.update(matches)
+        return bool(m), msg, cache
     else:
         log.debug('\tType doesn\'t match or cannot guess type.')
-        return False, msg, match_group, cache
+        return False, msg, cache
 
 
 def log_var_references(msg, action):
@@ -189,15 +200,16 @@ def plumb_run_func(msg, arguments):
     try:
         ret = subprocess.call(tmp.split())
         if ret == 0:
-            return True, msg, match_group
+            return True, msg
         else:
             log.info('\t\tTarget program exited with non-zero exit code'
                      ' ({})'.format(ret))
-            return False, msg, match_group
+            return False, msg
     except FileNotFoundError as e:
         log.info("\t\tRule failed because there is no program named '{}' on the"
                  " PATH.".format(e.strerror.split("'")[1]))
-        return False, msg, match_group
+        return False, msg
+
 
 def plumb_download_func(msg, arguments):
     try:
@@ -206,13 +218,12 @@ def plumb_download_func(msg, arguments):
         log.info('\t\tNo such variable: {{{var}}}'.format(var=e.args[0]))
         return False, msg
 
-def plumb_download_func(msg, arguments, match_group):
     headers = {'User-agent' : 'Mozilla/5.0 (Windows NT 6.3; rv:36.0) '
                'Gecko/20100101 Firefox/36.0'}
 
     tmp_dir = tempfile.gettempdir()
 
-    url = arguments.format(*match_group, **msg)
+    url = arguments.format(**msg)
 
     request = requests.get(url, headers=headers, stream=True)
 
@@ -224,10 +235,10 @@ def plumb_download_func(msg, arguments, match_group):
                     f.flush()
 
             msg['filename'] = f.name
-            return True, msg, match_group
+            return True, msg
     except OSError as e:
         log.info('Error downloading file: ' + str(e))
-        return False, msg, match_group
+        return False, msg
 
 
 match_clauses = {
@@ -257,14 +268,12 @@ def handle_rules(msg, rules):
         match_lines, action_lines = rule_lines
         log.debug('Matching against rule [%s]', rule_name)
 
-        match_group = ()
-
         for line in match_lines:
             obj, verb = line[0:2]
             arguments = line[2:]
 
             f = match_clauses[obj + ' ' + verb]
-            res, msg, match_group, cache = f(msg, arguments, match_group, cache)
+            res, msg, cache = f(msg, arguments, cache)
 
             if not res:
                 rule_matched = False
@@ -278,11 +287,20 @@ def handle_rules(msg, rules):
                 obj, verb, action = line
                 log.info('\tExecuting action "%s = %s" for rule [%s].',
                          obj + ' ' + verb, action, rule_name)
+
+                # regex match group references (i.e. number variables, e.g.
+                # {0}) get prepended with a backslash (e.g. {\0}) so they can
+                # be referred by name in python's format() instead of being
+                # interpreted as positional arguments
+                action = escape_match_group_references(action)
+
                 f = action_clauses[obj + ' ' + verb]
-                res, msg, match_group = f(msg, action, match_group)
+                res, msg = f(msg, action)
                 if not res:
                     break
             break
+        else:
+            msg.reverse()   # reset all changes to the message made in this rule
     else:
         log.info('No rule matched.')
 
@@ -436,7 +454,7 @@ def main():
 
     rules = parse_rules(args, config)
 
-    handle_rules(msg, rules)
+    handle_rules(ElasticDict(msg), rules)
 
 
 if __name__ == '__main__':
