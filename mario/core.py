@@ -365,8 +365,8 @@ def parse_rules(args, config):
         try:
             rule_file = open(default_rule)
         except OSError as e:
-            log.error(str(e))
-            return -1
+            log.error('Rules file doesn\'t exist: {}'.format(e.filename))
+            return None
 
     log.info('Using rule file {}'.format(rule_file.name))
     rules = parse_rule_file(parser, rule_file)
@@ -453,6 +453,9 @@ def main():
         msg['netpath'] = url.path
 
     rules = parse_rules(args, config)
+
+    if not rules:
+        sys.exit(1)
 
     handle_rules(ElasticDict(msg), rules)
 
