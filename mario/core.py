@@ -112,11 +112,11 @@ def mime_from_buffer(buf):
             m.load()
             t, _ = m.buffer(buf.encode('utf-8')).split(';')
         except AttributeError as e:
-            log.error('Your \'magic\' module is unsupported. ' + \
-                    'Install either https://github.com/ahupp/python-magic ' + \
-                    'or https://github.com/file/file/tree/master/python ' + \
-                    '(official \'file\' python bindings, available as the ' + \
-                    'python-magic package on many distros)')
+            log.error('Your \'magic\' module is unsupported. '
+                      'Install either https://github.com/ahupp/python-magic '
+                      'or https://github.com/file/file/tree/master/python '
+                      '(official \'file\' python bindings, available as the '
+                      'python-magic package on many distros)')
 
             raise SystemExit
 
@@ -377,9 +377,9 @@ def parse_rules(args, config):
 
 
 def parse_config(args):
-    def_rule_dir = os.path.join(BaseDirectory.xdg_config_home, 'mario', \
+    def_rule_dir = os.path.join(BaseDirectory.xdg_config_home, 'mario',
                                 'rules.d')
-    def_rule_file = os.path.join(BaseDirectory.xdg_config_home, 'mario', \
+    def_rule_file = os.path.join(BaseDirectory.xdg_config_home, 'mario',
                                 'mario.plumb')
     defaults = {
             'strict content lookup' : False,            # TODO
@@ -396,7 +396,7 @@ def parse_config(args):
     if args.config:
         config_file = args.config
     else:
-        default_config = os.path.join(BaseDirectory.xdg_config_home, 'mario', \
+        default_config = os.path.join(BaseDirectory.xdg_config_home, 'mario',
                                       'config')
         try:
             config_file = open(default_config)
