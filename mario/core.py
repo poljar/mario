@@ -401,7 +401,7 @@ def parse_config(args):
         try:
             config_file = open(default_config)
         except OSError as e:
-            log.info(str(e))
+            log.info('Config file doesn\'t exist: {}'.format(e.filename))
             return defaults
 
     log.info('Using config file {}'.format(config_file.name))
