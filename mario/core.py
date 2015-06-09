@@ -356,8 +356,6 @@ def setup_logger(verbosity):
 def parse_rules(args, config):
     parser = make_parser()
 
-    rule_file = None
-
     if args.rule:
         rule_file = args.rule
     else:
