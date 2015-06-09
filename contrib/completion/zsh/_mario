@@ -6,7 +6,7 @@ _mario() {
         {-v,--verbose}'[increase log verbosity level (pass multiple times)]' \
         '--guess[guess the kind of the message]' \
         '--config[config file to use]:config:_files' \
-        '--rule[rule file to use]:rules:_files -g \*.plumb' \
+        '--rules[rules file to use]:rules:_files -g \*.plumb' \
         '2:kinds:(raw url)' \
         '--print-mimetype[detect and print the mimetype of the message data, then exit]' \
 }

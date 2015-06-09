@@ -320,7 +320,7 @@ def parse_arguments():
 
     parser.add_argument('--config', type=argparse.FileType('r'),
                         help='config file to use')
-    parser.add_argument('--rule', type=argparse.FileType('r'),
+    parser.add_argument('--rules', type=argparse.FileType('r'),
                         help='rule file to use')
 
     parser.add_argument('--print-mimetype', action='store_true',
