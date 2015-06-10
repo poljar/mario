@@ -112,7 +112,7 @@ def extract_parse_result(result):
 
 
 def print_parse_error(e):
-    print(e, ':\n\t', e.line)
+    print(e, ':\n\t', e.line, sep="")
     error_indicator = '\t' + ' ' * e.col + '^'
 
     print(error_indicator)
