@@ -19,7 +19,7 @@ from enum import Enum
 from functools import reduce
 from urllib.parse import urlparse
 
-from mario.parser import make_parser, parse_rule_file
+from mario.parser import make_parser, parse_rules_file
 from mario.util import ElasticDict
 
 class Kind(Enum):
@@ -321,7 +321,7 @@ def parse_arguments():
     parser.add_argument('--config', type=argparse.FileType('r'),
                         help='config file to use')
     parser.add_argument('--rules', type=argparse.FileType('r'),
-                        help='rule file to use')
+                        help='rules file to use')
 
     parser.add_argument('--print-mimetype', action='store_true',
                         help='detect and print the mimetype of the message data, '
@@ -356,34 +356,34 @@ def setup_logger(verbosity):
 def parse_rules(args, config):
     parser = make_parser()
 
-    if args.rule:
-        rule_file = args.rule
+    if args.rules:
+        rules_file = args.rules
     else:
-        default_rule = config['rules file']
+        default_rules = config['rules file']
         try:
-            rule_file = open(default_rule)
+            rules_file = open(default_rules)
         except OSError as e:
             log.error('Rules file doesn\'t exist: {}'.format(e.filename))
             return None
 
-    log.info('Using rule file {}'.format(rule_file.name))
-    rules = parse_rule_file(parser, rule_file)
-    rule_file.close()
+    log.info('Using rules file {}'.format(rules_file.name))
+    rules = parse_rules_file(parser, rules_file)
+    rules_file.close()
     log.info('Rules parsed.')
 
     return rules
 
 
 def parse_config(args):
-    def_rule_dir = os.path.join(BaseDirectory.xdg_config_home, 'mario',
+    def_rules_dir = os.path.join(BaseDirectory.xdg_config_home, 'mario',
                                 'rules.d')
-    def_rule_file = os.path.join(BaseDirectory.xdg_config_home, 'mario',
+    def_rules_file = os.path.join(BaseDirectory.xdg_config_home, 'mario',
                                 'mario.plumb')
     defaults = {
             'strict content lookup' : False,            # TODO
             'notifications'         : False,            # TODO
-            'rules file'            : def_rule_file,
-            'rules dir'             : def_rule_dir,     # TODO
+            'rules file'            : def_rules_file,
+            'rules dir'             : def_rules_dir,     # TODO
     }
 
     config = configparser.ConfigParser(defaults=defaults,

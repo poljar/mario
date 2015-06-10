@@ -118,9 +118,9 @@ def print_parse_error(e):
     print(error_indicator)
 
 
-def parse_rule_file(parser, rule_file):
+def parse_rules_file(parser, rules_file):
     try:
-        result = parser.parseFile(rule_file)
+        result = parser.parseFile(rules_file)
     except ParseException as e:
         print_parse_error(e)
         return None
