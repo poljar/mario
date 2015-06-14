@@ -26,15 +26,34 @@ simple_res = [
 ]
 
 
-multiple_margs_rule = '''[test]
+multiple_margs_rule1 = '''[test]
 arg matches {data} regex_string
                    regex_inbetween
 plumb run firefox'''
 
-multiple_margs_res = [
+multiple_margs_res1 = [
     ['test', (
         [
             ['arg', 'matches', '{data}', ['regex_string', 'regex_inbetween']]
+        ],
+        [
+            ['plumb', 'run', 'firefox']
+        ]
+    )]
+]
+
+
+multiple_margs_rule2 = '''[test]
+arg matches {data} foo
+            bar
+        baz
+                    spam
+plumb run firefox'''
+
+multiple_margs_res2 = [
+    ['test', (
+        [
+            ['arg', 'matches', '{data}', ['foo', 'bar', 'baz', 'spam']]
         ],
         [
             ['plumb', 'run', 'firefox']
@@ -69,6 +88,7 @@ multiple_res = [
         ]
     )]
 ]
+
 
 rule_with_comment = '''# this is a comment
 [test] # even here?
@@ -161,7 +181,10 @@ class ParserTest(unittest.TestCase):
         self.parser_test_helper(simple_rule, simple_res)
 
     def test_multiple_match_args(self):
-        self.parser_test_helper(multiple_margs_rule, multiple_margs_res)
+        self.parser_test_helper(multiple_margs_rule1, multiple_margs_res1)
+
+    def test_multiple_match_args_with_inconsistent_whitespace(self):
+        self.parser_test_helper(multiple_margs_rule2, multiple_margs_res2)
 
     def test_multiple_rules(self):
         self.parser_test_helper(multiple_rules, multiple_res)
@@ -185,7 +208,7 @@ class ParserTest(unittest.TestCase):
         self.parser_test_helper(data_object_rule, simple_res)
 
     def test_data_multiple_marg(self):
-        self.parser_test_helper(data_multiple_margs_rule, multiple_margs_res)
+        self.parser_test_helper(data_multiple_margs_rule, multiple_margs_res1)
 
 # UTIL TESTS
 
