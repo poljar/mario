@@ -62,6 +62,28 @@ multiple_margs_res2 = [
 ]
 
 
+multiple_clauses_per_block = '''[test]
+data matches foo
+arg matches {spam} eggs
+plumb run swallow
+plumb download {spam}'''
+
+multiple_clauses_per_block_res = [
+    ['test', (
+        [
+            ['arg', 'matches', '{data}', ['foo']],
+            ['arg', 'matches', '{spam}', ['eggs']]
+        ],
+        [
+            ['plumb', 'run', 'swallow'],
+            ['plumb', 'download', '{spam}']
+        ]
+    )]
+]
+
+
+
+
 multiple_rules = '''[test]
 arg matches {data} regex_string
                    regex_inbetween
@@ -186,6 +208,10 @@ class ParserTest(unittest.TestCase):
     def test_multiple_match_args_with_inconsistent_whitespace(self):
         self.parser_test_helper(multiple_margs_rule2, multiple_margs_res2)
 
+    def test_multiple_clauses_per_block(self):
+        self.parser_test_helper(multiple_clauses_per_block,
+                multiple_clauses_per_block_res)
+
     def test_multiple_rules(self):
         self.parser_test_helper(multiple_rules, multiple_res)
 
@@ -199,7 +225,8 @@ class ParserTest(unittest.TestCase):
         self.parser_test_helper(rule_utf8_names, res_utf8_names)
 
     def test_multiple_variables(self):
-        self.parser_test_helper(multiple_variables_rule, multiple_variables_res)
+        self.parser_test_helper(multiple_variables_rule,
+                multiple_variables_res)
 
     def test_whitespace(self):
         self.parser_test_helper(liberal_whitespace, simple_res)
