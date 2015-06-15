@@ -4,8 +4,13 @@
 
 import unittest
 
-from mario.core import get_var_references, arg_matches_func, arg_rewrite_func, Kind
-from mario.parser import make_parser, parse_rule_string
+from mario.core import ( get_var_references,
+                         arg_matches_func,
+                         arg_rewrite_func,
+                         Kind )
+from mario.parser import ( make_parser,
+                           parse_rule_string,
+                           extract_parse_result_as_list )
 from mario.util import ElasticDict
 
 # PARSER TESTS
