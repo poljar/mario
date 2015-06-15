@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (c) 2015 Damir Jelić
+# Copyright (c) 2015 Damir Jelić, Denis Kasak
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
