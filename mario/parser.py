@@ -105,7 +105,7 @@ def extract_parse_result(result):
 
     for rule in result:
         rules += [[rule['rule-name'],
-                    (kind_clause + rule['match-block'],
+                    (rule['kind-clause'] + rule['match-block'],
                      rule['action-block'])
                  ]]
 
