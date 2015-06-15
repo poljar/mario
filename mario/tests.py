@@ -9,7 +9,7 @@ from mario.core import ( get_var_references,
                          arg_rewrite_func,
                          Kind )
 from mario.parser import ( make_parser,
-                           parse_rule_string,
+                           parse_rules_string_exc,
                            extract_parse_result_as_list )
 from mario.util import ElasticDict
 
@@ -228,7 +228,7 @@ plumb run firefox'''
 class ParserTest(unittest.TestCase):
     def parser_test_helper(self, rule, result):
         parser = make_parser()
-        res = parse_rule_string(parser, rule, extract_parse_result_as_list)
+        res = parse_rules_string_exc(parser, rule, extract_parse_result_as_list)
         self.assertEqual(result, res)
 
     def test_validate_parser(self):
