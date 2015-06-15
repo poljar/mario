@@ -177,11 +177,11 @@ complex_var_res = [
 ]
 
 
-rule_utf8_names = '''[čest]
+rule_unicode_names = '''[čest]
 arg matches /bla/{data}/ćla.py regex_stringić # comments ¹²³
 plumb run firefȭx'''
 
-res_utf8_names = [
+res_unicode_names = [
     ['čest', (
         [
             ['arg', 'matches', '/bla/{data}/ćla.py', ['regex_stringić']]
@@ -263,8 +263,8 @@ class ParserTest(unittest.TestCase):
     def test_complex_var(self):
         self.parser_test_helper(rule_complex_variable, complex_var_res)
 
-    def test_utf8(self):
-        self.parser_test_helper(rule_utf8_names, res_utf8_names)
+    def test_unicode(self):
+        self.parser_test_helper(rule_unicode_names, res_unicode_names)
 
     def test_multiple_variables(self):
         self.parser_test_helper(multiple_variables_rule,
@@ -278,6 +278,7 @@ class ParserTest(unittest.TestCase):
 
     def test_data_multiple_marg(self):
         self.parser_test_helper(data_multiple_margs_rule, multiple_margs_res1)
+
 
 # UTIL TESTS
 
