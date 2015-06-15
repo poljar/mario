@@ -15,91 +15,90 @@ class Named(ParseElementEnhance):
             pbe.loc = loc
             raise pbe
 
+
 def make_parser():
-    ParserElement.setDefaultWhitespaceChars('')
+    ParserElement.setDefaultWhitespaceChars(' \t')
 
-    EOL    = LineEnd().suppress()
-    Space  = Literal(' ').suppress()
-    Tab    = Literal('\t').suppress()
-    WS     = OneOrMore(Space) | OneOrMore(Tab)
+    EOL    = OneOrMore(LineEnd()).suppress().setName("end of line")
 
-    Comment   = LineStart() + ZeroOrMore(' ') + '#' + restOfLine + EOL | \
-                OneOrMore(' ') + '#' + restOfLine
-    BlankLine = LineStart() + ZeroOrMore(' ') + EOL
-
+    # NOTE: These are not all 'printable' Unicode characters.
+    # If needed, expand the alphas_extra variable.
     alphas_extra = ''.join(chr(x) for x in range(0x100, 0x350))
+    chars = printables + alphas8bit + alphas_extra
+    Token = Word(chars)
 
-    # NOTE: this are not all 'printable' Unicode characters if needed expand
-    # the alphas_extra variable.
-    utf8_printables = printables + alphas8bit + alphas_extra
+    InlineComment    = '#' - SkipTo(EOL)
+    WholelineComment = LineStart() + '#' - restOfLine - EOL
 
-    ArgTxt   = Word(utf8_printables)('arg')
-    # TODO: allow the excluded chars if they are escaped.
-    NameTxt  = Word(utf8_printables, excludeChars='{ } [ ]')
+    Argument = Token('arg').setName('argument')
+    Variable = Token('var').setName('variable')
 
-    Variable = Word(utf8_printables)
+    KindObject  = Keyword('kind')('object')
+    KindVerb    = Keyword('is'  )('verb')
+    Kind        = Named(Keyword('url')
+                       |Keyword('raw'))('arg')
 
-    KindObjects = Keyword('kind')
-    KindVerbs   = Keyword('is')
-    KindArgs    = Keyword('url') | Keyword('raw')
+    MatchObject = Named(Keyword('arg' ))('object')
+    data        = Named(Keyword('data'))('object')
+    MatchVerb   = Named(Keyword('is'     )
+                       |Keyword('matches')
+                       |Keyword('rewrite'))('verb').setName('verb')
+    Pattern     = Named(Group(OneOrMore(Argument + EOL)))('arg')
 
-    KindMatchRule = Group(KindObjects('object') + WS +
-                          KindVerbs('verb')     + WS +
-                          KindArgs('args'))
+    ActionObject = Keyword('plumb')('object')
+    ActionVerb   = Named(Keyword('run'     )
+                        |Keyword('download'))('verb')
+    Action       = Named(originalTextFor(OneOrMore(Argument)))('arg')
 
-    MatchArg = Group(ArgTxt + ZeroOrMore(EOL + WS + ArgTxt))
-    MatchArg = MatchArg('arg')
-
-    MatchObjects = Keyword('arg')
-    MatchVerbs   = (Keyword('is')      |
-                    Keyword('istype')  |
-                    Keyword('matches') |
-                    Keyword('rewrite'))
-    MatchVerbs   = MatchVerbs('verb')
-
-    ArgMatchRule = Group(Keyword('arg')('object') + WS +
-                         MatchVerbs               + WS +
-                         Variable('var')          + WS +
-                         MatchArg)
-    ArgMatchRule = ArgMatchRule('match-rule')
-
-    DataMatchRule = Group(Keyword('data')('object') + WS +
-                          MatchVerbs                + WS +
-                          MatchArg)
-    DataMatchRule = DataMatchRule('match-rule')
+    ArgMatchClause  = Group(MatchObject - MatchVerb - Variable - Pattern)
+    DataMatchClause = Group(data - MatchVerb - Pattern)
 
     # Transform every 'data match' rule to an equivalent 'arg match' rule
-    def data_to_arg_rule(toks):
+    def data_to_arg(toks):
         assert(len(toks) == 1)
         return [['arg', toks[0]['verb'], '{data}', list(toks[0]['arg'])]]
 
-    DataMatchRule.setParseAction(data_to_arg_rule)
+    DataMatchClause.setParseAction(data_to_arg)
 
-    MatchRule = ArgMatchRule | DataMatchRule
+    KindClause   = Group(KindObject - KindVerb - Kind) - EOL
+    MatchClause  = (DataMatchClause | ArgMatchClause)
+    ActionClause = Group(ActionObject - ActionVerb - Action) - EOL
 
-    MatchLines = (Group(Optional(KindMatchRule('kind-rule') + EOL) +
-                        MatchRule + ZeroOrMore(EOL + MatchRule))   |
-                  Group(KindMatchRule('kind-rule')))
+    MatchBlock  = Group(ZeroOrMore(MatchClause('match-clause')))
+    ActionBlock = Group(OneOrMore(ActionClause('action-clause')))
 
-    ActionObject = Keyword('plumb')
-    ActionVerb   = Keyword('run') | Keyword('download')
+    # TODO: allow the excluded chars if they are escaped.
+    RuleName = Word(chars, excludeChars='{ } [ ]')('rule-name')
+    RuleHeading = Suppress('[') - RuleName - Suppress(']') - EOL
+    Rule = Group(RuleHeading
+                - KindClause('kind-clause')
+                - MatchBlock('match-block')
+                - ActionBlock('action-block'))
+    RulesFile = OneOrMore(Rule)
+    RulesFile.ignore(WholelineComment)
+    RulesFile.ignore(InlineComment)
 
-    ActionArg = Combine(Word(utf8_printables) +
-                ZeroOrMore(OneOrMore(' ') + NotAny('#') + Word(utf8_printables)))
+    for v in [MatchObject, ActionObject]:
+        v.setName('object')
 
-    ActionRule = Group(ActionObject('object') + WS +
-                       ActionVerb('verb')     + WS +
-                       ActionArg('arg'))
+    for v in [MatchVerb, ActionVerb]:
+        v.setName('verb')
 
-    ActionRule = ActionRule('act-rule')
+    Kind.setName('kind')
+    data.setName('object')
+    Pattern.setName('pattern')
+    Action.setName('action or url')
+    KindClause.setName('kind clause')
+    MatchClause.setName('match clause')
+    ActionClause.setName('action clause')
+    MatchBlock.setName('match block')
+    ActionBlock.setName('action block')
+    Rule.setName('rule')
+    RuleName.setName('rule name')
+    RulesFile.setName('rules')
 
-    ActionLines = Group(ActionRule + ZeroOrMore(EOL + ActionRule))
+    return RulesFile
 
-    RuleName = Suppress('[') + NameTxt + Suppress(']') + EOL
-
-    Rule = Group(RuleName('name') +
-                 MatchLines('match-lines') + EOL +
-                 ActionLines('act-lines'))
 
 def extract_parse_result(result):
     rules = []
