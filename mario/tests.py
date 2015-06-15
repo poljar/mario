@@ -87,6 +87,37 @@ multiple_clauses_per_block_res = [
 ]
 
 
+no_match_block = '''[test]
+plumb run swallow
+plumb download {spam}
+'''
+
+no_match_block_res = [
+    ['test', (
+        [],
+        [
+            ['plumb', 'run', 'swallow'],
+            ['plumb', 'download', '{spam}']
+        ]
+    )],
+]
+
+
+no_action_block = '''[test]
+arg matches {data} regex_string
+                   regex_inbetween
+arg is {data} something
+'''
+
+no_action_block_res = [
+    ['test', (
+        [
+            ['arg', 'matches', '{data}', ['regex_string', 'regex_inbetween']],
+            ['arg', 'is', '{data}', ['something']]
+        ],
+        []
+    )],
+]
 
 
 multiple_rules = '''[test]
@@ -216,6 +247,12 @@ class ParserTest(unittest.TestCase):
     def test_multiple_clauses_per_block(self):
         self.parser_test_helper(multiple_clauses_per_block,
                 multiple_clauses_per_block_res)
+
+    def test_no_match_block(self):
+        self.parser_test_helper(no_match_block, no_match_block_res)
+
+    def test_no_action_block(self):
+        self.parser_test_helper(no_action_block, no_action_block_res)
 
     def test_multiple_rules(self):
         self.parser_test_helper(multiple_rules, multiple_res)
