@@ -369,7 +369,7 @@ def parse_rules(args, config):
     log.info('Using rules file {}'.format(rules_file.name))
     rules = parse_rules_file(parser, rules_file)
     rules_file.close()
-    log.info('Rules parsed.')
+    log.debug('Rules parsed.')
 
     return rules
 
@@ -407,7 +407,7 @@ def parse_config(args):
     config.read_file(config_file)
     config_file.close()
 
-    log.info('Config parsed.')
+    log.debug('Config parsed.')
 
     return config.defaults()
 

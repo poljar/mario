@@ -228,7 +228,7 @@ plumb run firefox'''
 class ParserTest(unittest.TestCase):
     def parser_test_helper(self, rule, result):
         parser = make_parser()
-        res = parse_rule_string(parser, rule)
+        res = parse_rule_string(parser, rule, extract_parse_result_as_list)
         self.assertEqual(result, res)
 
     def test_validate_parser(self):

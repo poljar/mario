@@ -92,17 +92,19 @@ def make_parser():
                  MatchLines('match-lines') + EOL +
                  ActionLines('act-lines'))
 
-    RuleFile = (Rule('rule') + ZeroOrMore(EOL + Rule('rule')) +
-                ZeroOrMore(EOL) + StringEnd())
-    RuleFile = RuleFile('rules')
-
-    RuleFile.ignore(Comment)
-    RuleFile.ignore(BlankLine)
-
-    return RuleFile
-
-
 def extract_parse_result(result):
+    rules = []
+
+    for rule in result:
+        rules += [[rule['rule-name'],
+                    (kind_clause + rule['match-block'],
+                     rule['action-block'])
+                 ]]
+
+    return rules
+
+
+def extract_parse_result_as_list(result):
     rules = []
 
     for rule in result.asList():
@@ -118,21 +120,13 @@ def print_parse_error(e):
     print(error_indicator)
 
 
-def parse_rules_file(parser, rules_file):
-    try:
-        result = parser.parseFile(rules_file)
-    except ParseException as e:
-        print_parse_error(e)
-        return None
+def parse_rules_file(parser, rules_file, extract_function=extract_parse_result):
+    result = parser.parseFile(rules_file)
 
-    return extract_parse_result(result)
+    return extract_function(result)
 
 
-def parse_rule_string(parser, rule_string):
-    try:
-        result = parser.parseString(rule_string)
-    except ParseException as e:
-        print_parse_error(e)
-        return None
+def parse_rule_string(parser, rule_string, extract_function=extract_parse_result):
+    result = parser.parseString(rule_string)
 
-    return extract_parse_result(result)
+    return extract_function(result)
