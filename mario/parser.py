@@ -128,13 +128,30 @@ def print_parse_error(e):
     print(error_indicator)
 
 
-def parse_rules_file(parser, rules_file, extract_function=extract_parse_result):
-    result = parser.parseFile(rules_file)
+def catch_parse_errors(f, handler=print_parse_error):
+    @wraps(f)
+    def w(x, *args):
+        try:
+            return f(x, *args)
+        except (ParseException, ParseSyntaxException) as e:
+            handler(e)
+
+    return w
+
+
+def parse_rules_file_exc(parser, rules_file,
+        extract_function=extract_parse_result):
+    result = parser.parseFile(rules_file, parseAll=True)
 
     return extract_function(result)
 
 
-def parse_rule_string(parser, rule_string, extract_function=extract_parse_result):
-    result = parser.parseString(rule_string)
+def parse_rules_string_exc(parser, rule_string,
+        extract_function=extract_parse_result):
+    result = parser.parseString(rule_string, parseAll=True)
 
     return extract_function(result)
+
+
+parse_rules_file = catch_parse_errors(parse_rules_file_exc)
+parse_rules_string = catch_parse_errors(parse_rules_string_exc)
