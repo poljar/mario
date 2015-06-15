@@ -4,7 +4,16 @@
 # found in the LICENSE file.
 
 from pyparsing import *
+from functools import wraps
 
+class Named(ParseElementEnhance):
+    def parseImpl(self, instring, loc, doActions = True):
+        try:
+            return super(Named,self).parseImpl(instring, loc, doActions)
+        except ParseBaseException as pbe:
+            pbe.msg = "Expected " + str(self)
+            pbe.loc = loc
+            raise pbe
 
 def make_parser():
     ParserElement.setDefaultWhitespaceChars('')
