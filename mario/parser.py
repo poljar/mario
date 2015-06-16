@@ -126,7 +126,7 @@ def extract_parse_result_as_list(result):
 
 def print_parse_error(e):
     print(e, ':\n\t', e.line, sep="")
-    error_indicator = '\t' + ' ' * e.col + '^'
+    error_indicator = '\t' + ' ' * (e.col - 1) + '^'
 
     print(error_indicator)
 
