@@ -41,6 +41,7 @@ def make_parser():
     MatchObject = Named(Keyword('arg' ))('object')
     data        = Named(Keyword('data'))('object')
     MatchVerb   = Named(Keyword('is'     )
+                       |Keyword('istype' )
                        |Keyword('matches')
                        |Keyword('rewrite'))('verb').setName('verb')
     Pattern     = Named(Group(OneOrMore(Argument + EOL)))('arg')
