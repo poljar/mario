@@ -232,6 +232,25 @@ data matches regex_string
 plumb run firefox'''
 
 
+verb_istype = '''[test]
+kind is raw
+data istype text/plain
+plumb run editor
+'''
+
+verb_istype_res = [
+    ['test', (
+        ['kind', 'is', 'raw'],
+        [
+            ['arg', 'istype', '{data}', ['text/plain']]
+        ],
+        [
+            ['plumb', 'run', 'editor']
+        ]
+    )]
+]
+
+
 class ParserTest(unittest.TestCase):
     def parser_test_helper(self, rule, result):
         parser = make_parser()
@@ -282,6 +301,9 @@ class ParserTest(unittest.TestCase):
 
     def test_data_multiple_marg(self):
         self.parser_test_helper(data_multiple_margs_rule, multiple_margs_res1)
+
+    def test_verb_istype(self):
+        self.parser_test_helper(verb_istype, verb_istype_res)
 
 
 # UTIL TESTS
