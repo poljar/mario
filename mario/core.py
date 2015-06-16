@@ -369,7 +369,6 @@ def parse_rules(args, config):
     log.info('Using rules file {}'.format(rules_file.name))
     rules = parse_rules_file(parser, rules_file)
     rules_file.close()
-    log.debug('Rules parsed.')
 
     return rules
 
@@ -453,7 +452,10 @@ def main():
     rules = parse_rules(args, config)
 
     if not rules:
+        log.info('Syntax error in rules file. Quitting...')
         sys.exit(1)
+    else:
+        log.info('Rules parsed.')
 
     handle_rules(ElasticDict(msg), rules)
 
