@@ -20,6 +20,7 @@ def make_parser():
     ParserElement.setDefaultWhitespaceChars(' \t')
 
     EOL    = OneOrMore(LineEnd()).suppress().setName("end of line")
+    Spaces = OneOrMore(" ").suppress()
 
     # NOTE: These are not all 'printable' Unicode characters.
     # If needed, expand the alphas_extra variable.
@@ -44,7 +45,7 @@ def make_parser():
                        |Keyword('istype' )
                        |Keyword('matches')
                        |Keyword('rewrite'))('verb').setName('verb')
-    Pattern     = Named(Group(OneOrMore(Argument + EOL)))('arg')
+    Pattern     = Named(Group(OneOrMore(Spaces + Argument + EOL)))('arg').leaveWhitespace()
 
     ActionObject = Keyword('plumb')('object')
     ActionVerb   = Named(Keyword('run'     )
