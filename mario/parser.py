@@ -56,7 +56,9 @@ def make_parser():
     # Transform every 'data match' rule to an equivalent 'arg match' rule
     def data_to_arg(toks):
         assert(len(toks) == 1)
-        return [['arg', toks[0]['verb'], '{data}', list(toks[0]['arg'])]]
+        toks[0][0] = 'arg'
+        toks[0].insert(2, '{data}')
+        return toks
 
     DataMatchClause.setParseAction(data_to_arg)
 
