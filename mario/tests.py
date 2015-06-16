@@ -16,11 +16,13 @@ from mario.util import ElasticDict
 # PARSER TESTS
 
 simple_rule = '''[test]
+kind is raw
 arg matches {data} regex_string
 plumb run firefox'''
 
 simple_res = [
     ['test', (
+        ['kind', 'is', 'raw'],
         [
             ['arg', 'matches', '{data}', ['regex_string']]
         ],
@@ -32,12 +34,14 @@ simple_res = [
 
 
 multiple_margs_rule1 = '''[test]
+kind is url
 arg matches {data} regex_string
                    regex_inbetween
 plumb run firefox'''
 
 multiple_margs_res1 = [
     ['test', (
+        ['kind', 'is', 'url'],
         [
             ['arg', 'matches', '{data}', ['regex_string', 'regex_inbetween']]
         ],
@@ -49,6 +53,7 @@ multiple_margs_res1 = [
 
 
 multiple_margs_rule2 = '''[test]
+kind is raw
 arg matches {data} foo
             bar
         baz
@@ -57,6 +62,7 @@ plumb run firefox'''
 
 multiple_margs_res2 = [
     ['test', (
+        ['kind', 'is', 'raw'],
         [
             ['arg', 'matches', '{data}', ['foo', 'bar', 'baz', 'spam']]
         ],
@@ -68,6 +74,7 @@ multiple_margs_res2 = [
 
 
 multiple_clauses_per_block = '''[test]
+kind is raw
 data matches foo
 arg matches {spam} eggs
 plumb run swallow
@@ -75,6 +82,7 @@ plumb download {spam}'''
 
 multiple_clauses_per_block_res = [
     ['test', (
+        ['kind', 'is', 'raw'],
         [
             ['arg', 'matches', '{data}', ['foo']],
             ['arg', 'matches', '{spam}', ['eggs']]
@@ -88,12 +96,14 @@ multiple_clauses_per_block_res = [
 
 
 no_match_block = '''[test]
+kind is raw
 plumb run swallow
 plumb download {spam}
 '''
 
 no_match_block_res = [
     ['test', (
+        ['kind', 'is', 'raw'],
         [],
         [
             ['plumb', 'run', 'swallow'],
@@ -121,15 +131,18 @@ no_action_block_res = [
 
 
 multiple_rules = '''[test]
+kind is raw
 arg matches {data} regex_string
                    regex_inbetween
 plumb run firefox
 [test2]
+kind is raw
 arg is {data} something
 plumb run echo {data}'''
 
 multiple_res = [
     ['test', (
+        ['kind', 'is', 'raw'],
         [
             ['arg', 'matches', '{data}', ['regex_string', 'regex_inbetween']]
         ],
@@ -138,6 +151,7 @@ multiple_res = [
         ]
     )],
     ['test2', (
+        ['kind', 'is', 'raw'],
         [
             ['arg', 'is', '{data}', ['something']]
         ],
@@ -150,6 +164,7 @@ multiple_res = [
 
 rule_with_comment = '''# this is a comment
 [test] # even here?
+kind is raw
 # another one
     
 arg matches {data} regex_string # commenting is fun
@@ -162,11 +177,13 @@ plumb run firefox # inline commenting wherever I want
 
 
 rule_complex_variable = '''[test]
+kind is raw
 arg matches /bla/{data}/bla.py regex_string
 plumb run firefox'''
 
 complex_var_res = [
     ['test', (
+        ['kind', 'is', 'raw'],
         [
             ['arg', 'matches', '/bla/{data}/bla.py', ['regex_string']]
         ],
@@ -178,11 +195,13 @@ complex_var_res = [
 
 
 rule_unicode_names = '''[čest]
+kind is raw
 arg matches /bla/{data}/ćla.py regex_stringić # comments ¹²³
 plumb run firefȭx'''
 
 res_unicode_names = [
     ['čest', (
+        ['kind', 'is', 'raw'],
         [
             ['arg', 'matches', '/bla/{data}/ćla.py', ['regex_stringić']]
         ],
@@ -194,11 +213,13 @@ res_unicode_names = [
 
 
 multiple_variables_rule = '''[test]
+kind is raw
 arg matches /bla/{data}/{another} regex_string
 plumb run firefox'''
 
 multiple_variables_res = [
     ['test', (
+        ['kind', 'is', 'raw'],
         [
             ['arg', 'matches', '/bla/{data}/{another}', ['regex_string']]
         ],
@@ -210,16 +231,19 @@ multiple_variables_res = [
 
 
 liberal_whitespace = '''[test] # co
+kind is raw
 arg     matches         {data}         regex_string      #   white      space    
 plumb     run        firefox'''
 
 
 data_object_rule = '''[test]
+kind is raw
 data matches regex_string
 plumb run firefox'''
 
 
 data_multiple_margs_rule = '''[test]
+kind is url
 data matches regex_string
              regex_inbetween
 plumb run firefox'''

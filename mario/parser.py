@@ -116,7 +116,7 @@ def extract_parse_result_as_list(result):
     rules = []
 
     for rule in result.asList():
-        rules += [[rule[0], (rule[1], rule[2])]]
+        rules += [[rule[0], (rule[1], rule[2], rule[3])]]
 
     return rules
 
