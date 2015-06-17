@@ -320,7 +320,7 @@ def parse_arguments():
 
     parser.add_argument('--config', type=argparse.FileType('r'),
                         help='config file to use')
-    parser.add_argument('--rules', type=argparse.FileType('r'),
+    parser.add_argument('--rules',
                         help='rules file to use')
 
     parser.add_argument('--print-mimetype', action='store_true',
@@ -357,18 +357,17 @@ def parse_rules(args, config):
     parser = make_parser()
 
     if args.rules:
-        rules_file = args.rules
+        rules_filename = args.rules
     else:
-        default_rules = config['rules file']
-        try:
-            rules_file = open(default_rules)
-        except OSError as e:
-            log.error('Rules file doesn\'t exist: {}'.format(e.filename))
-            return None
+        rules_filename = config['rules file']
 
-    log.info('Using rules file {}'.format(rules_file.name))
-    rules = parse_rules_file(parser, rules_file)
-    rules_file.close()
+    try:
+        with open(rules_filename) as rules_file:
+            log.info('Using rules file {}'.format(rules_file.name))
+            rules = parse_rules_file(parser, rules_file)
+    except OSError as e:
+        log.error('Rules file doesn\'t exist: {}'.format(e.filename))
+        return None
 
     return rules
 

@@ -145,7 +145,8 @@ def catch_parse_errors(f, handler=print_parse_error):
 
 def parse_rules_file_exc(parser, rules_file,
         extract_function=extract_parse_result):
-    result = parser.parseFile(rules_file, parseAll=True)
+    s = rules_file.read().rstrip()
+    result = parser.parseString(s, parseAll=True)
 
     return extract_function(result)
 
