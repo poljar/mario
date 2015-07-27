@@ -91,6 +91,10 @@ def arg_matches_func(msg, arguments, cache):
 
 def arg_rewrite_func(msg, arguments, cache):
     arg, patterns = arguments
+
+    # Escape regex match group references in the argument, if any
+    arg = escape_match_group_references(arg)
+
     tmp = arg.format(**msg)
     arg = arg.strip('{}')
 
