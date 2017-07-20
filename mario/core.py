@@ -287,6 +287,8 @@ def handle_rules(msg, rules):
 
         if rule_matched:
             log.info('Rule [%s] matched.', rule_name)
+            msg['rule_name'] = rule_name
+
             for line in action_lines:
                 obj, verb, action = line
                 log.info('\tExecuting action "%s = %s" for rule [%s].',
