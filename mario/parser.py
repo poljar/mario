@@ -3,13 +3,18 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-from pyparsing import *
+from pyparsing import (ParserElement, Word, Group, Keyword,
+                       ParseElementEnhance, ParseBaseException,
+                       ParseSyntaxException, ParseException, LineStart,
+                       LineEnd, SkipTo, Suppress, ZeroOrMore, OneOrMore,
+                       originalTextFor, restOfLine, printables, alphas8bit)
 from functools import wraps
 
+
 class Named(ParseElementEnhance):
-    def parseImpl(self, instring, loc, doActions = True):
+    def parseImpl(self, instring, loc, doActions=True):
         try:
-            return super(Named,self).parseImpl(instring, loc, doActions)
+            return super(Named, self).parseImpl(instring, loc, doActions)
         except ParseBaseException as pbe:
             pbe.msg = "Expected " + str(self)
             pbe.loc = loc
@@ -35,21 +40,24 @@ def make_parser():
     Variable = Token('var').setName('variable')
 
     KindObject  = Keyword('kind')('object')
-    KindVerb    = Keyword('is'  )('verb')
-    Kind        = Named(Keyword('url')
-                       |Keyword('raw'))('arg')
+    KindVerb    = Keyword('is')('verb')
+    Kind        = Named(Keyword('url') |
+                        Keyword('raw'))('arg')
 
-    MatchObject = Named(Keyword('arg' ))('object')
+    MatchObject = Named(Keyword('arg'))('object')
     data        = Named(Keyword('data'))('object')
-    MatchVerb   = Named(Keyword('is'     )
-                       |Keyword('istype' )
-                       |Keyword('matches')
-                       |Keyword('rewrite'))('verb').setName('verb')
-    Pattern     = Named(Group(OneOrMore(Spaces + Argument + EOL)))('arg').leaveWhitespace()
+    MatchVerb   = Named(Keyword('is')      |
+                        Keyword('istype')  |
+                        Keyword('matches') |
+                        Keyword('rewrite'))('verb').setName('verb')
+    Pattern     = Named(Group(
+                        OneOrMore(Spaces   +
+                                  Argument +
+                                  EOL)))('arg').leaveWhitespace()
 
     ActionObject = Keyword('plumb')('object')
-    ActionVerb   = Named(Keyword('run'     )
-                        |Keyword('download'))('verb')
+    ActionVerb   = Named(Keyword('run')    |
+                         Keyword('download'))('verb')
     Action       = Named(originalTextFor(OneOrMore(Argument)))('arg')
 
     ArgMatchClause  = Group(MatchObject - MatchVerb - Variable - Pattern)
@@ -74,10 +82,10 @@ def make_parser():
     # TODO: allow the excluded chars if they are escaped.
     RuleName = Word(chars, excludeChars='{ } [ ]')('rule-name')
     RuleHeading = Suppress('[') - RuleName - Suppress(']') - EOL
-    Rule = Group(RuleHeading
-                - KindClause('kind-clause')
-                - MatchBlock('match-block')
-                - ActionBlock('action-block'))
+    Rule = Group(RuleHeading               -
+                 KindClause('kind-clause') -
+                 MatchBlock('match-block') -
+                 ActionBlock('action-block'))
     RulesFile = OneOrMore(Rule)
     RulesFile.ignore(WholelineComment)
     RulesFile.ignore(InlineComment)
@@ -109,9 +117,8 @@ def extract_parse_result(result):
 
     for rule in result:
         rules += [[rule['rule-name'],
-                    (rule['kind-clause'] + rule['match-block'],
-                     rule['action-block'])
-                 ]]
+                   (rule['kind-clause'] + rule['match-block'],
+                    rule['action-block'])]]
 
     return rules
 
@@ -144,7 +151,7 @@ def catch_parse_errors(f, handler=print_parse_error):
 
 
 def parse_rules_file_exc(parser, rules_file,
-        extract_function=extract_parse_result):
+                         extract_function=extract_parse_result):
     s = rules_file.read().rstrip()
     result = parser.parseString(s, parseAll=True)
 
@@ -152,7 +159,7 @@ def parse_rules_file_exc(parser, rules_file,
 
 
 def parse_rules_string_exc(parser, rule_string,
-        extract_function=extract_parse_result):
+                           extract_function=extract_parse_result):
     result = parser.parseString(rule_string, parseAll=True)
 
     return extract_function(result)
