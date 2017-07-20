@@ -12,6 +12,7 @@ import tempfile
 import mimetypes
 import subprocess
 import configparser
+import notify2
 import logging as log
 import magic
 from xdg import BaseDirectory
@@ -215,6 +216,14 @@ def plumb_run_func(msg, arguments):
         return False, msg
 
 
+def plumb_notify_func(msg, arguments):
+    message = arguments.format(**msg)
+    n = notify2.Notification(msg['rule_name'], message)
+    n.show()
+
+    return True, msg
+
+
 def plumb_download_func(msg, arguments):
     try:
         log_var_references(msg, arguments)
@@ -255,6 +264,7 @@ match_clauses = {
 
 action_clauses = {
         'plumb run'      : plumb_run_func,
+        'plumb notify'   : plumb_notify_func,
         'plumb download' : plumb_download_func,
 }
 
@@ -423,6 +433,9 @@ def main():
     args = parse_arguments()
 
     setup_logger(args.verbose)
+
+    # initialize Desktop Notifications
+    notify2.init('mario')
 
     if args.guess:
         log.info('Using heuristics to guess kind...')

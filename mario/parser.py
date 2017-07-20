@@ -57,6 +57,7 @@ def make_parser():
 
     ActionObject = Keyword('plumb')('object')
     ActionVerb   = Named(Keyword('run')    |
+                         Keyword('notify') |
                          Keyword('download'))('verb')
     Action       = Named(originalTextFor(OneOrMore(Argument)))('arg')
 
