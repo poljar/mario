@@ -3,7 +3,7 @@
 " Maintainers: Damir Jelić, Denis Kasak
 " Latest Revision: 26 March 2015
 
-if exists("b:current_syntax")
+if exists('b:current_syntax')
   finish
 endif
 
@@ -31,5 +31,4 @@ hi def link marioActionVerbs   Function
 set commentstring=#%s
 set comments=b:#
 
-let b:current_syntax = "plumb"
-
+let b:current_syntax = 'plumb'
