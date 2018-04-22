@@ -1,7 +1,7 @@
 " Vim syntax file
 " Language: Mario rules
 " Maintainers: Damir Jelić, Denis Kasak
-" Latest Revision: 26 March 2015
+" Latest Revision: 22 April 2018
 
 scriptencoding utf-8
 
