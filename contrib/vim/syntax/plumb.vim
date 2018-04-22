@@ -1,6 +1,6 @@
 " Vim syntax file
 " Language: Mario rules
-" Maintainer: Damir Jelić
+" Maintainers: Damir Jelić, Denis Kasak
 " Latest Revision: 26 March 2015
 
 if exists("b:current_syntax")
