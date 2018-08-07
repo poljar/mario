@@ -56,7 +56,7 @@ def get_var_references(s):
             start = p2+1
             yield s[p1:p2+1]
         else:
-            raise StopIteration
+            return
 
 
 def kind_is_func(msg, arguments, cache):
