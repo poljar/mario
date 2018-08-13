@@ -109,8 +109,7 @@ def arg_rewrite_func(msg, arguments, cache):
 
 def mime_from_buffer(buf):
     try:
-        # magic returns the mimetype as bytes, hence the decode
-        t = magic.from_buffer(buf, mime=True).decode('utf-8')
+        t = magic.from_buffer(buf, mime=True)
     except AttributeError:
         try:
             m = magic.open(magic.MIME)
