@@ -343,6 +343,12 @@ class TestElasticDict(unittest.TestCase):
         self.assertDictEqual(d.strain, {'grenade' : 'antioch',
                                         'tea' : 'green'})
 
+    def test_iter(self):
+        d = ElasticDict({'a': 1, 'b': 2})
+        d['b'] = 42
+        d['c'] = 3
+        self.assertListEqual(list(d), ['a', 'b', 'c'])
+
 # CORE TESTS
 
 class CoreTest(unittest.TestCase):

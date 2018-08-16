@@ -19,7 +19,7 @@ class ElasticDict(collections.MutableMapping):
         del self.strain[key]
 
     def __iter__(self):
-        return chain(iter(self.original), iter(self.strain))
+        return iter(set(self.original) | set(self.strain))
 
     def __len__(self):
         return len(set(self.original.keys()) | set(self.strain.keys()))
