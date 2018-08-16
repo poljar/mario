@@ -4,13 +4,13 @@
 
 import unittest
 
-from mario.core import ( get_var_references,
-                         arg_matches_func,
-                         arg_rewrite_func,
-                         Kind )
-from mario.parser import ( make_parser,
-                           parse_rules_string_exc,
-                           extract_parse_result_as_list )
+from mario.core import (get_var_references,
+                        arg_matches_func,
+                        arg_rewrite_func,
+                        Kind)
+from mario.parser import (make_parser,
+                          parse_rules_string_exc,
+                          extract_parse_result_as_list)
 from mario.util import ElasticDict
 
 # PARSER TESTS
@@ -254,7 +254,9 @@ verb_istype_res = [
 class ParserTest(unittest.TestCase):
     def parser_test_helper(self, rule, result):
         parser = make_parser()
-        res = parse_rules_string_exc(parser, rule, extract_parse_result_as_list)
+        res = parse_rules_string_exc(parser,
+                                     rule,
+                                     extract_parse_result_as_list)
         self.assertEqual(result, res)
 
     def test_validate_parser(self):
@@ -272,7 +274,7 @@ class ParserTest(unittest.TestCase):
 
     def test_multiple_clauses_per_block(self):
         self.parser_test_helper(multiple_clauses_per_block,
-                multiple_clauses_per_block_res)
+                                multiple_clauses_per_block_res)
 
     def test_no_match_block(self):
         self.parser_test_helper(no_match_block, no_match_block_res)
@@ -291,7 +293,7 @@ class ParserTest(unittest.TestCase):
 
     def test_multiple_variables(self):
         self.parser_test_helper(multiple_variables_rule,
-                multiple_variables_res)
+                                multiple_variables_res)
 
     def test_whitespace(self):
         self.parser_test_helper(liberal_whitespace, simple_res)
@@ -326,7 +328,7 @@ class TestElasticDict(unittest.TestCase):
         self.assertNotIn('spam', d)
 
     def test_reverse_resets_changes(self):
-        d = ElasticDict({'spam' : 'eggs'})
+        d = ElasticDict({'spam': 'eggs'})
         d['spam'] = 'bacon'
         d.reverse()
         self.assertEqual(d['spam'], 'eggs')
@@ -337,11 +339,11 @@ class TestElasticDict(unittest.TestCase):
             d['bar']
 
     def test_strain(self):
-        d = ElasticDict({'tea' : 'oolong'})
+        d = ElasticDict({'tea': 'oolong'})
         d['tea'] = 'green'
         d['grenade']  = 'antioch'
-        self.assertDictEqual(d.strain, {'grenade' : 'antioch',
-                                        'tea' : 'green'})
+        self.assertDictEqual(d.strain, {'grenade': 'antioch',
+                                        'tea': 'green'})
 
     def test_iter(self):
         d = ElasticDict({'a': 1, 'b': 2})
@@ -349,24 +351,24 @@ class TestElasticDict(unittest.TestCase):
         d['c'] = 3
         self.assertListEqual(list(d), ['a', 'b', 'c'])
 
+
 # CORE TESTS
 
 class CoreTest(unittest.TestCase):
     def test_arg_matches_func_match_groups(self):
         self.assertEqual(
             arg_matches_func(
-              {'data' : 'foo1bar2'},
-              ("{data}", ["foo(.)bar(.)"]),
-              {}
+                {'data': 'foo1bar2'},
+                ("{data}", ["foo(.)bar(.)"]),
+                {}
             ),
-            (True, {'data' : 'foo1bar2', '\\0' : '1', '\\1' : '2'}, {})
+            (True, {'data': 'foo1bar2', '\\0': '1', '\\1': '2'}, {})
         )
 
     def test_arg_rewrite_simple(self):
         self.assertEqual(
-            arg_rewrite_func({'data' : 'oolong',
-                              'kind' : Kind['raw']
-                             },
+            arg_rewrite_func({'data': 'oolong',
+                              'kind': Kind['raw']},
                              ['{data}', ['oo,', 'g,g jing']],
                              {}),
             (True, {'data': 'long jing', 'kind': Kind['raw']}, {})
