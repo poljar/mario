@@ -42,7 +42,8 @@ def make_parser():
     KindObject  = Keyword('kind')('object')
     KindVerb    = Keyword('is')('verb')
     Kind        = Named(Keyword('url') |
-                        Keyword('raw'))('arg')
+                        Keyword('raw') |
+                        Keyword('text'))('arg')
 
     MatchObject = Named(Keyword('arg'))('object')
     data        = Named(Keyword('data'))('object')

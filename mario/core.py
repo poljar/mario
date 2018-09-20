@@ -24,8 +24,9 @@ from mario.parser import make_parser, parse_rules_file
 from mario.util import ElasticDict
 
 class Kind(Enum):
-    raw = 1
-    url = 2
+    raw  = 1
+    text = 2
+    url  = 3
 
 def lookup_content_type(url):
     headers = {'User-agent' : 'Mozilla/5.0 (Windows NT 6.3; rv:36.0) '
@@ -83,7 +84,7 @@ def arg_matches_func(msg, arguments, cache):
 
         if m:
             matches = {"\\{}".format(i) : e
-                            for i, e in enumerate(m.groups())}
+                       for i, e in enumerate(m.groups())}
             msg.update(matches)
             return True, msg, cache
     else:
@@ -142,6 +143,8 @@ def detect_mimetype(kind, var):
 
     elif kind == Kind.raw:
         t = mime_from_buffer(var)
+    elif kind == Kind.text:
+        t = 'text/plain'
     else:
         t = None
 
@@ -436,20 +439,31 @@ def main():
     # initialize Desktop Notifications
     notify2.init('mario')
 
+    # Use - to indicate the data part of the message will be read from
+    # stdin.
+    # XXX: '-' is valid message data, though, so we may want to handle
+    # this differently, but it suffices for now
+    if args.msg == '-':
+        args.msg = sys.stdin.buffer.read()
+
     if args.guess:
         log.info('Using heuristics to guess kind...')
-        url = urlparse(args.msg)
-        if url.scheme:
-            args.kind = Kind.url
-        else:
-            args.kind = Kind.raw
-        log.info('\tGuessed kind {}'.format(args.kind))
 
-    # probably a hack and possibly a reason why we can't really read in
-    # messages (or rather, the data part of the message) as a command-line
-    # parameter
-    if args.kind == Kind.raw and type(args.msg) != bytes:
-        args.msg = args.msg.encode('utf-8')
+        if type(args.msg) is bytes:
+            try:
+                args.msg = args.msg.decode('utf-8')
+            except UnicodeDecodeError:
+                args.kind = Kind.raw
+
+        if type(args.msg) is str:
+            url = urlparse(args.msg)
+
+            if url.scheme:
+                args.kind = Kind.url
+            else:
+                args.kind = Kind.text
+
+        log.info('\tGuessed kind {}'.format(args.kind))
 
     if args.print_mimetype:
         print(detect_mimetype(args.kind, args.msg))
