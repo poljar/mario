@@ -1,6 +1,7 @@
 mario.egg-info/
 .eggs/
 __pycache__/
+.mypy_cache/
 build/
 dist/
 bin/
