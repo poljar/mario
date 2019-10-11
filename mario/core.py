@@ -3,34 +3,38 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import mimetypes
 import os
 import re
-import sys
-import requests
-import argparse
-import tempfile
-import mimetypes
 import subprocess
-import configparser
-import notify2
-import logging as log
-import magic
-from xdg import BaseDirectory
+import sys
+import tempfile
+
 from enum import Enum
 from functools import reduce
 from urllib.parse import urlparse
 
+import argparse
+import configparser
+import logging as log
+import magic
+import notify2
+import requests
+from xdg import BaseDirectory
+
 from mario.parser import make_parser, parse_rules_file
 from mario.util import ElasticDict
+
 
 class Kind(Enum):
     raw  = 1
     text = 2
-    url  = 3
+    url = 3
+
 
 def lookup_content_type(url):
-    headers = {'User-agent' : 'Mozilla/5.0 (Windows NT 6.3; rv:36.0) '
-               'Gecko/20100101 Firefox/36.0'}
+    headers = {'User-agent': 'Mozilla/5.0 (Windows NT 6.3; rv:36.0) '
+                             'Gecko/20100101 Firefox/36.0'}
 
     try:
         request = requests.head(url, headers=headers)
@@ -83,7 +87,7 @@ def arg_matches_func(msg, arguments, cache):
         m = re.search(pattern, arg)
 
         if m:
-            matches = {"\\{}".format(i) : e
+            matches = {"\\{}".format(i): e
                        for i, e in enumerate(m.groups())}
             msg.update(matches)
             return True, msg, cache
@@ -100,8 +104,9 @@ def arg_rewrite_func(msg, arguments, cache):
     tmp = arg.format(**msg)
     arg = arg.strip('{}')
 
-    f = lambda acc, pattern: acc.replace(*pattern.split(',', 2))
-    tmp = reduce(f, patterns, tmp)
+    def split(acc, pattern):
+        return acc.replace(*pattern.split(',', 2))
+    tmp = reduce(split, patterns, tmp)
 
     msg[arg] = tmp
 
@@ -116,7 +121,7 @@ def mime_from_buffer(buf):
             m = magic.open(magic.MIME)
             m.load()
             t, _ = m.buffer(buf.encode('utf-8')).split(';')
-        except AttributeError as e:
+        except AttributeError:
             log.error('Your \'magic\' module is unsupported. '
                       'Install either https://github.com/ahupp/python-magic '
                       'or https://github.com/file/file/tree/master/python '
@@ -133,11 +138,12 @@ def detect_mimetype(kind, var):
         t, _ = mimetypes.guess_type(var)
 
         if not t:
-            log.debug('Failed mimetype guessing... Trying Content-Type header.')
+            log.debug('Failed mimetype guessing... '
+                      'Trying Content-Type header.')
             t, _ = lookup_content_type(var)
 
             if t:
-                log.debug('Content-Type: {}'.format(t))
+                log.debug('Content-Type: %s', t)
             else:
                 log.debug('Failed fetching Content-Type.')
 
@@ -176,8 +182,8 @@ def arg_istype_func(msg, arguments, cache):
 
     if m:
         log.debug('\tType matches: {}'.format(m.group()))
-        matches = {"\\{}".format(i) : e
-                        for i, e in enumerate(m.groups())}
+        matches = {"\\{}".format(i): e
+                   for i, e in enumerate(m.groups())}
         msg.update(matches)
         return bool(m), msg, cache
     else:
@@ -210,11 +216,11 @@ def plumb_run_func(msg, arguments):
             return True, msg
         else:
             log.info('\t\tTarget program exited with non-zero exit code'
-                     ' ({})'.format(ret))
+                     ' (%s)', format(ret))
             return False, msg
     except FileNotFoundError as e:
-        log.info("\t\tRule failed because there is no program named '{}' on the"
-                 " PATH.".format(e.strerror.split("'")[1]))
+        log.info("\t\tRule failed because there is no program named '%s' on "
+                 "the PATH.", format(e.strerror.split("'")[1]))
         return False, msg
 
 
@@ -233,7 +239,7 @@ def plumb_download_func(msg, arguments):
         log.info('\t\tNo such variable: {{{var}}}'.format(var=e.args[0]))
         return False, msg
 
-    headers = {'User-agent' : 'Mozilla/5.0 (Windows NT 6.3; rv:36.0) '
+    headers = {'User-agent': 'Mozilla/5.0 (Windows NT 6.3; rv:36.0) '
                'Gecko/20100101 Firefox/36.0'}
 
     tmp_dir = tempfile.gettempdir()
@@ -245,7 +251,7 @@ def plumb_download_func(msg, arguments):
     try:
         with tempfile.NamedTemporaryFile(prefix='plumber-', dir=tmp_dir, delete=False) as f:
             for chunk in request.iter_content(chunk_size=1024):
-                if chunk: # filter out keep-alive new chunks
+                if chunk:  # filter out keep-alive new chunks
                     f.write(chunk)
                     f.flush()
 
@@ -257,17 +263,17 @@ def plumb_download_func(msg, arguments):
 
 
 match_clauses = {
-        'kind is'      : kind_is_func,
-        'arg is'       : arg_is_func,
-        'arg istype'   : arg_istype_func,
-        'arg matches'  : arg_matches_func,
-        'arg rewrite'  : arg_rewrite_func,
+    'kind is': kind_is_func,
+    'arg is': arg_is_func,
+    'arg istype': arg_istype_func,
+    'arg matches': arg_matches_func,
+    'arg rewrite': arg_rewrite_func,
 }
 
 action_clauses = {
-        'plumb run'      : plumb_run_func,
-        'plumb notify'   : plumb_notify_func,
-        'plumb download' : plumb_download_func,
+    'plumb run': plumb_run_func,
+    'plumb notify': plumb_notify_func,
+    'plumb download': plumb_download_func,
 }
 
 
@@ -275,7 +281,7 @@ def handle_rules(msg, rules):
     log.info('Matching message against rules.')
 
     cache = {
-            'type' : {},
+        'type': {},
     }
 
     for rule in rules:
@@ -356,9 +362,9 @@ def parse_arguments():
 def setup_logger(verbosity):
     if verbosity:
         log_levels = {
-            1 : log.WARNING,
-            2 : log.INFO,
-            3 : log.DEBUG
+            1: log.WARNING,
+            2: log.INFO,
+            3: log.DEBUG
         }
         try:
             verbosity = log_levels[verbosity]
@@ -392,14 +398,14 @@ def parse_rules(args, config):
 
 def parse_config(args):
     def_rules_dir = os.path.join(BaseDirectory.xdg_config_home, 'mario',
-                                'rules.d')
+                                 'rules.d')
     def_rules_file = os.path.join(BaseDirectory.xdg_config_home, 'mario',
-                                'mario.plumb')
+                                  'mario.plumb')
     defaults = {
-            'strict content lookup' : False,            # TODO
-            'notifications'         : False,            # TODO
-            'rules file'            : def_rules_file,
-            'rules dir'             : def_rules_dir,     # TODO
+        'strict content lookup': False, # TODO
+        'notifications': False,         # TODO
+        'rules file': def_rules_file,
+        'rules dir': def_rules_dir,     # TODO
     }
 
     config = configparser.ConfigParser(defaults=defaults,
@@ -441,6 +447,7 @@ def main():
 
     # Use - to indicate the data part of the message will be read from
     # stdin.
+    #
     # XXX: '-' is valid message data, though, so we may want to handle
     # this differently, but it suffices for now
     if args.msg == '-':
@@ -471,8 +478,8 @@ def main():
 
     config = parse_config(args)
 
-    msg = {'data' : args.msg,
-           'kind' : args.kind
+    msg = {'data': args.msg,
+           'kind': args.kind
           }
 
     if args.kind == Kind.url:
