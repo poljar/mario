@@ -201,17 +201,17 @@ def log_var_references(msg, action):
             value=msg[var_name]))
 
 
-def plumb_run_func(msg, arguments):
+def plumb_run_func(msg, argument_string):
     try:
-        log_var_references(msg, arguments)
+        log_var_references(msg, argument_string)
     except KeyError as e:
         log.info('\t\tNo such variable: {{{var}}}'.format(var=e.args[0]))
         return False, msg
 
-    tmp = arguments.format(**msg)
+    arguments = [arg.format(**msg) for arg in argument_string.split()]
 
     try:
-        ret = subprocess.call(tmp.split())
+        ret = subprocess.call(arguments)
         if ret == 0:
             return True, msg
         else:
